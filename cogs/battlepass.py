@@ -61,7 +61,7 @@ class BattlepassCog(commands.Cog):
             db.create_user(
                 user_id=user_id,
                 guild_id=guild_id,
-                last_awarded_at=registration_timestamp,
+                redemption_time=registration_timestamp,
                 user_name=user_name
                 )
 

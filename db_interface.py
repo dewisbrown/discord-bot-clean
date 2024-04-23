@@ -236,6 +236,24 @@ def retrieve_owned_item(user_id: int, item_name: str):
     return cursor.fetchone()
 
 
+def create_item_submission(
+        user_id: int, user_name: str,
+        item_name: str, value: int, rarity: str) -> None:
+    """
+    Creates item in item_submissions table.
+    """
+    # Connect to the database
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    query = '''INSERT INTO shop_submissions
+            (user_id, item_name, value, rarity)
+            VALUES (?, ?, ?, ?)'''
+
+    cursor.execute(query,(user_id, user_name, item_name, value, rarity))
+    conn.commit()
+
+
 # Currently not in use, not sure if needed or wanted.
 def create_command_request(user_id: int, guild_id: int, command: str, cog: str) -> None:
     """

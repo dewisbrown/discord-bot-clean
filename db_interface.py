@@ -28,7 +28,7 @@ def get_user_id(user_id):
     return cursor.fetchone()
 
 
-def add_user(user_id: int, last_awarded_at, user_name: str, guild_id: int):
+def create_user(user_id: int, last_awarded_at, user_name: str, guild_id: int):
     """
     Enters user into battlepass table.
     """
@@ -43,7 +43,7 @@ def add_user(user_id: int, last_awarded_at, user_name: str, guild_id: int):
     conn.commit()
 
 
-def get_points(user_id: int):
+def retrieve_points(user_id: int):
     """
     Retrieves user points from battlepass table.
     """
@@ -59,7 +59,7 @@ def get_points(user_id: int):
     return result[0]
 
 
-def get_last_awarded_at(user_id):
+def retrieve_last_awarded_at(user_id: int):
     """
     Retrieves timestamp of last point redemeption for a user.
     """
@@ -78,7 +78,7 @@ def get_last_awarded_at(user_id):
         return None
 
 
-def set_last_awarded_at(user_id, current_time):
+def update_last_awarded_at(user_id: int, current_time):
     """
     Updates timestamp for most recent point redemption for a user.
     """
@@ -93,7 +93,7 @@ def set_last_awarded_at(user_id, current_time):
     conn.close()
 
 
-def set_points(user_id, points):
+def update_points(user_id: int, points: int) -> None:
     """
     Updates user points.
     """
@@ -107,7 +107,7 @@ def set_points(user_id, points):
     conn.close()
 
 
-def get_level(user_id):
+def retrieve_level(user_id: int):
     """
     Retrieves user level.
     """
@@ -125,7 +125,7 @@ def get_level(user_id):
         return None
 
 
-def set_level(user_id: int, level: int):
+def update_level(user_id: int, level: int):
     """
     Update user level.
     """
@@ -138,7 +138,7 @@ def set_level(user_id: int, level: int):
     conn.close()
 
 
-def get_inventory(user_id: int):
+def retrieve_inventory(user_id: int):
     """
     Retrieves user inventory.
     """
@@ -154,7 +154,11 @@ def get_inventory(user_id: int):
     return cursor.fetchall()
 
 
-def add_to_inventory(user_id, item_name, item_value, item_rarity, purchase_date):
+def update_inventory(user_id: int, 
+                     item_name: str, 
+                     item_value: int, 
+                     item_rarity: str, 
+                     purchase_date):
     """
     Creates inventory record.
     """
@@ -171,7 +175,7 @@ def add_to_inventory(user_id, item_name, item_value, item_rarity, purchase_date)
     conn.close()
 
 
-def get_top_five():
+def retrieve_top_five():
     """
     Retrieve list of five highest point users.
     """
@@ -185,16 +189,16 @@ def get_top_five():
     return cursor.fetchall()
 
 
-def get_shop_items():
+def retrieve_shop_items():
     """
-    Retrieves nine items at random from shop table.
+    Retrieves ten items at random from shop table.
     """
     # Can be rarity counts can be changed at any time
     rarity_counts = {
         'Legendary': 1,
         'Exotic': 1,
         'Very Rare': 1,
-        'Rare': 1,
+        'Rare': 2,
         'Uncommon': 2,
         'Common': 3
     }
@@ -216,7 +220,7 @@ def get_shop_items():
     return selected_items
 
 
-def get_owned_item(user_id, item_name: str):
+def retrieve_owned_item(user_id: int, item_name: str):
     """
     Retrieves item from user inventory. Returns None if user does not have item.
     """

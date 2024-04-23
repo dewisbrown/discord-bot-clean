@@ -11,7 +11,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS battlepass (
                     user_id INTEGER PRIMARY KEY,
                     guild_id INTEGER,
                     points INTEGER DEFAULT 20,
-                    last_awarded_at TIMESTAMP,
+                    redemption_time TIMESTAMP,
                     level INTEGER DEFAULT 1,
                     user_name TEXT
                 )''')

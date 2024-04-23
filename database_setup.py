@@ -10,7 +10,7 @@ cursor = conn.cursor()
 cursor.execute('''CREATE TABLE IF NOT EXISTS battlepass (
                     user_id INTEGER PRIMARY KEY,
                     guild_id INTEGER,
-                    points INTEGER DEFAULT 0,
+                    points INTEGER DEFAULT 20,
                     last_awarded_at TIMESTAMP,
                     level INTEGER DEFAULT 1,
                     user_name TEXT

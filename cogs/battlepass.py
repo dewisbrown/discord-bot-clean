@@ -20,20 +20,27 @@ import utils
 
 
 class BattlepassCog(commands.Cog):
-    '''Commands to register for battlepass, collect points, and increase tier level with points.'''
+    """
+    Commands to register for battlepass, collect points, increase level,
+    and interact with item shop.
+    """
     def __init__(self, bot):
         self.bot = bot
 
 
     @commands.Cog.listener()
     async def on_ready(self):
-        '''Print statment to ensure loads properly.'''
+        """
+        Print statment to ensure loads properly.
+        """
         logging.info('Battlepass Cog loaded.')
 
 
     @commands.command()
     async def register(self, ctx):
-        '''Enters user into battlepass database.'''
+        """
+        Creates user in battlepass database.
+        """
         logging.info('Register command submitted by [%s]', ctx.author.name)
 
         user_id = ctx.author.id
@@ -59,7 +66,7 @@ class BattlepassCog(commands.Cog):
                 )
 
             embed = discord.Embed(title='Battlepass Registration', timestamp=registration_timestamp)
-            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
+            embed.set_author(name=user_name, icon_url=ctx.author.avatar)
             embed.set_thumbnail(url='http://media.comicbook.com/2018/05/battle-pass-icon-1111187.jpeg')
             embed.add_field(name='', value='You have received 20 points for registering.', inline=False)
             await ctx.send(embed=embed)
@@ -175,7 +182,9 @@ class BattlepassCog(commands.Cog):
 
     @commands.command()
     async def battlepass(self, ctx):
-        '''Returns the users current level and points.'''
+        """
+        Returns the users current level and points.
+        """
         logging.info('Battlepass command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
         user_name = ctx.author.name
@@ -188,7 +197,7 @@ class BattlepassCog(commands.Cog):
 
         if points:
             embed = discord.Embed(title='Battlepass Progress', timestamp=datetime.datetime.now())
-            embed.set_author(name=ctx.author.name)
+            embed.set_author(name=user_name)
             embed.set_thumbnail(url=ctx.author.avatar)
             embed.add_field(name=f'Level: {level}', value=f'Points: {points}', inline=False)
             await ctx.send(embed=embed)
@@ -198,7 +207,9 @@ class BattlepassCog(commands.Cog):
 
     @commands.command()
     async def top5(self, ctx):
-        '''Returns the top 5 battlepass members.'''
+        """
+        Returns the top 5 battlepass members.
+        """
         logging.info('Top5 command submitted by [%s]', ctx.author.name)
         embed = discord.Embed(title='Top 5 Battlepass Members', description='Sorted by level and points.', timestamp=datetime.datetime.now())
         embed.set_thumbnail(url='https://ih1.redbubble.net/image.660900869.4748/pp,504x498-pad,600x600,f8f8f8.u8.jpg')

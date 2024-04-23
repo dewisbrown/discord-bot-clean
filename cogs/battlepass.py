@@ -188,7 +188,6 @@ class BattlepassCog(commands.Cog):
         logging.info('Battlepass command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
         user_name = ctx.author.name
-        guild_id = ctx.author.guild.id
         guild_name = ctx.author.guild.name
 
         # Get user points and level
@@ -196,10 +195,11 @@ class BattlepassCog(commands.Cog):
         level = db.retrieve_level(user_id=user_id)
 
         if points:
-            embed = discord.Embed(title='Battlepass Progress', timestamp=datetime.datetime.now())
+            embed = discord.Embed(title=f'[{guild_name}] Battlepass Progress', timestamp=datetime.datetime.now())
             embed.set_author(name=user_name)
             embed.set_thumbnail(url=ctx.author.avatar)
             embed.add_field(name=f'Level: {level}', value=f'Points: {points}', inline=False)
+
             await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')

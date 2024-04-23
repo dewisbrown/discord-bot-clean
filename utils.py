@@ -2,11 +2,20 @@
 Module for helper functions and constants.
 Keeping inside cog directory for easier import.
 """
-def points(double_xp: bool) -> int:
+import datetime
+
+
+def points() -> int:
     """
-    Points awarded to user for battlepass. False arg
-    returns 15 points, while True returns 30.
+    Points awarded to user for battlepass. Double points
+    if redeemed between 18:00 and 22:00 CST.
     """
+    now = datetime.datetime.now()
+    start = datetime.datetime(now.year, now.month, now.day, 18, 0, 0)
+    end = datetime.datetime(now.year, now.month, now.day, 22, 0, 0)
+
+    double_xp = start <= now <= end
+
     if double_xp:
         return 30
     else:

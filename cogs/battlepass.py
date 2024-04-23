@@ -8,20 +8,6 @@ import db_interface as db
 import utils
 
 
-def get_points_to_level(level):
-    '''Helper function to let bot know how many points it cost to tier up.'''
-    if level < 5:
-        return 40
-    if level < 15:
-        return 50
-    if level < 25:
-        return 60
-    if level < 35:
-        return 75
-    if level < 50:
-        return 100
-
-
 def get_points_for_command(level):
     '''Helper function to determine how many points to give user when running $points.'''
     if level < 5:

@@ -1,3 +1,5 @@
+import sys
+import os
 import logging
 import datetime
 
@@ -5,21 +7,16 @@ import discord
 from discord.ext import commands
 
 import db_interface as db
+
+# Get the current and parent directories
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
+
+# Append the parent directory to the system path
+sys.path.append(parent_dir)
+
+# Import from parent directory
 import utils
-
-
-def get_points_for_command(level):
-    '''Helper function to determine how many points to give user when running $points.'''
-    if level < 5:
-        return 10
-    if level < 15:
-        return 20
-    if level < 25:
-        return 30
-    if level < 35:
-        return 45
-    if level < 50:
-        return 50
 
 
 class BattlepassCog(commands.Cog):
@@ -45,6 +42,8 @@ class BattlepassCog(commands.Cog):
         # added guild_id, not sure if needed
         # for maintaining user data in multiple servers
         guild_id = ctx.author.guild.id
+        guild_name = ctx.author.guild.name
+        logging.info('Guild name : [%s]', guild_name)
         registration_timestamp = datetime.datetime.now()
 
         user_exists = db.get_user_id(user_id=user_id)
@@ -62,10 +61,14 @@ class BattlepassCog(commands.Cog):
             embed = discord.Embed(title='Battlepass Registration', timestamp=registration_timestamp)
             embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
             embed.set_thumbnail(url='http://media.comicbook.com/2018/05/battle-pass-icon-1111187.jpeg')
-            embed.add_field(name='', value='You have received 100 points for registering.', inline=False)
+            embed.add_field(name='', value='You have received 20 points for registering.', inline=False)
             await ctx.send(embed=embed)
 
-            logging.info('[%s:%s] successfully registered for battlepass.', user_name, user_id[-4:])
+            logging.info(
+                '[%s:%s] successfully registered for battlepass in server [%s:%s].', 
+                user_name, utils.decimal_to_hex(user_id), 
+                guild_name, utils.decimal_to_hex(guild_id)
+                )
 
 
     @commands.command()

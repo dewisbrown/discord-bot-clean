@@ -1,8 +1,12 @@
 import logging
 import datetime
+
 import discord
 from discord.ext import commands
+
 import db_interface as db
+import utils
+
 
 def get_points_to_level(level):
     '''Helper function to let bot know how many points it cost to tier up.'''
@@ -75,7 +79,7 @@ class BattlepassCog(commands.Cog):
             embed.add_field(name='', value='You have received 100 points for registering.', inline=False)
             await ctx.send(embed=embed)
 
-            logging.info('[%s] successfully registered for battlepass.', user_name)
+            logging.info('[%s:%s] successfully registered for battlepass.', user_name, user_id[-4:])
 
 
     @commands.command()

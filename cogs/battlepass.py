@@ -51,7 +51,7 @@ class BattlepassCog(commands.Cog):
         if user_exists:
             await ctx.send("You are already registered.")
         else:
-            db.add_user(
+            db.create_user(
                 user_id=user_id,
                 guild_id=guild_id,
                 last_awarded_at=registration_timestamp,
@@ -82,21 +82,21 @@ class BattlepassCog(commands.Cog):
         guild_id = ctx.author.guild.id
         guild_name = ctx.author.guild.name
 
-        last_awarded_at_str = db.get_last_awarded_at(user_id=user_id)
+        redemption_time_str = db.retrieve_redemption_time(user_id=user_id)
 
-        if last_awarded_at_str:
-            last_awarded_at = datetime.datetime.strptime(last_awarded_at_str, '%Y-%m-%d %H:%M:%S.%f')
+        if redemption_time_str:
+            last_redeemed = datetime.datetime.strptime(redemption_time_str, '%Y-%m-%d %H:%M:%S.%f')
             current_time = datetime.datetime.now()
-            time_since_last_awarded = current_time - last_awarded_at
-            next_redemption_time = (last_awarded_at + datetime.timedelta(minutes=15)).strftime('%Y-%m-%d %I:%M %p')
+            time_since_redemption = current_time - last_redeemed
+            next_redemption_time = (last_redeemed + datetime.timedelta(minutes=15)).strftime('%Y-%m-%d %I:%M %p')
 
             # Check if it has been at least 15 minutes
-            if time_since_last_awarded.total_seconds() >= 900: # 15 minutes
-                level = db.get_level(user_id=user_id)
-                points = db.get_points(user_id=user_id)
+            if time_since_redemption.total_seconds() >= 900: # 15 minutes
+                level = db.retrieve_level(user_id=user_id)
+                points = db.retrieve_points(user_id=user_id)
 
-                db.set_points(user_id=user_id, points=(utils.points(False) + points))
-                db.set_last_awarded_at(user_id=user_id, current_time=current_time)
+                db.update_points(user_id=user_id, points=(utils.points(False) + points))
+                db.update_redemption_time(user_id=user_id, current_time=current_time)
 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
                 embed.set_author(name=f'Requested by {user_name}', icon_url=ctx.author.avatar)
@@ -105,7 +105,11 @@ class BattlepassCog(commands.Cog):
                 embed.add_field(name='', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
                 await ctx.send(embed=embed)
 
-                logging.info('Successfully awarded %d points to [%s:%s] in server [%s:%s].', utils.points(False), user_name, utils.decimal_to_hex(user_id))
+                logging.info('Successfully awarded %d points to [%s:%s] in server [%s:%s].',
+                             utils.points(False),
+                             user_name, utils.decimal_to_hex(user_id),
+                             guild_name, utils.decimal_to_hex(guild_id)
+                            )
 
             else:
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
@@ -134,6 +138,9 @@ class BattlepassCog(commands.Cog):
         """
         logging.info('Tierup command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
+        user_name = ctx.author.name
+        guild_id = ctx.author.guild.id
+        guild_name = ctx.author.guild.name
 
         current_level = db.get_level(user_id=user_id)
         points = db.get_points(user_id=user_id)
@@ -141,7 +148,7 @@ class BattlepassCog(commands.Cog):
         if points:
             points_to_level_up = utils.points_to_level_up(current_level)
             embed = discord.Embed(title='Battlepass Tier Up', timestamp=datetime.datetime.now())
-            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
+            embed.set_author(name=user_name, icon_url=ctx.author.avatar)
 
             if points >= points_to_level_up:
                 db.set_level(user_id=user_id, level=(current_level + 1))

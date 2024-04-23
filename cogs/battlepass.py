@@ -51,12 +51,15 @@ class BattlepassCog(commands.Cog):
 
         user_id = ctx.author.id
         user_name = ctx.author.name
+
+        # added guild_id, not sure if needed
+        # for maintaining user data in multiple servers
         guild_id = ctx.author.guild.id
         registration_timestamp = datetime.datetime.now()
 
-        result = db.get_user_id(user_id=user_id)
+        user_exists = db.get_user_id(user_id=user_id)
 
-        if result:
+        if user_exists:
             await ctx.send("You are already registered.")
         else:
             db.add_user(

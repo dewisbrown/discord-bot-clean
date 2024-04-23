@@ -2,6 +2,15 @@
 Module for helper functions and constants.
 Keeping inside cog directory for easier import.
 """
+def points(double_xp: bool) -> int:
+    """
+    Points awarded to user for battlepass.
+    """
+    if double_xp:
+        return 30
+    else:
+        return 15
+
 
 def decimal_to_hex(decimal: int) -> str:
     """

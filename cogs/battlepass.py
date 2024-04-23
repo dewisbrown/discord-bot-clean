@@ -139,7 +139,7 @@ class BattlepassCog(commands.Cog):
         points = db.get_points(user_id=user_id)
 
         if points:
-            points_to_level_up = get_points_to_level(current_level)
+            points_to_level_up = utils.points_to_level_up(current_level)
             embed = discord.Embed(title='Battlepass Tier Up', timestamp=datetime.datetime.now())
             embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
 

@@ -43,7 +43,7 @@ class BattlepassCog(commands.Cog):
         # for maintaining user data in multiple servers
         guild_id = ctx.author.guild.id
         guild_name = ctx.author.guild.name
-        logging.info('Guild name : [%s]', guild_name)
+
         registration_timestamp = datetime.datetime.now()
 
         user_exists = db.get_user_id(user_id=user_id)
@@ -73,9 +73,14 @@ class BattlepassCog(commands.Cog):
 
     @commands.command()
     async def points(self, ctx):
-        '''Allows user to get points every 15 minutes.'''
+        """
+        Allows user to receive points every 15 minutes.
+        """
         logging.info('Points command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
+        user_name = ctx.author.name
+        guild_id = ctx.author.guild.id
+        guild_name = ctx.author.guild.name
 
         last_awarded_at_str = db.get_last_awarded_at(user_id=user_id)
 
@@ -89,19 +94,18 @@ class BattlepassCog(commands.Cog):
             if time_since_last_awarded.total_seconds() >= 900: # 15 minutes
                 level = db.get_level(user_id=user_id)
                 points = db.get_points(user_id=user_id)
-                points_to_increment = get_points_for_command(level)
 
-                db.set_points(user_id=user_id, points=(points_to_increment + points))
+                db.set_points(user_id=user_id, points=(utils.points(False) + points))
                 db.set_last_awarded_at(user_id=user_id, current_time=current_time)
 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
-                embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+                embed.set_author(name=f'Requested by {user_name}', icon_url=ctx.author.avatar)
                 embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
-                embed.add_field(name=f'You\'ve been awarded {points_to_increment} points!', value=f'Updated points: {points + points_to_increment}', inline=False)
+                embed.add_field(name=f'You\'ve been awarded {utils.points(False)} points!', value=f'Updated points: {points + utils.points(False)}', inline=False)
                 embed.add_field(name='', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
                 await ctx.send(embed=embed)
 
-                logging.info('Successfully awarded %d points to [%s].', points_to_increment, ctx.author.name)
+                logging.info('Successfully awarded %d points to [%s:%s] in server [%s:%s].', utils.points(False), user_name, utils.decimal_to_hex(user_id))
 
             else:
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
@@ -110,15 +114,24 @@ class BattlepassCog(commands.Cog):
                 embed.add_field(name='', value=f'Your next redemption time is: {next_redemption_time}', inline=False)
                 await ctx.send(embed=embed)
 
-                logging.info('[%s] attempted to earn points before correct time.', ctx.author.name)
+                logging.info(
+                    '[%s:%s] attempted to earn points before correct time in server [%s:%s].', 
+                    user_name, utils.decimal_to_hex(user_id), 
+                    guild_name, utils.decimal_to_hex(guild_id)
+                    )
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
-            logging.info('[%s] attempted to earn points without being registered to battlepass.', ctx.author.name)
+            logging.info('[%s:%s] attempted to earn points without being registered to battlepass in server [%s:%s].',
+                         user_name, utils.decimal_to_hex(user_id),
+                         guild_name, utils.decimal_to_hex(guild_id)
+                         )
 
 
     @commands.command()
     async def tierup(self, ctx):
-        '''Allows the user to spend points to level up.'''
+        """
+        Allows the user to spend points to level up.
+        """
         logging.info('Tierup command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
 

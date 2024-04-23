@@ -4,7 +4,8 @@ Keeping inside cog directory for easier import.
 """
 def points(double_xp: bool) -> int:
     """
-    Points awarded to user for battlepass.
+    Points awarded to user for battlepass. False arg
+    returns 15 points, while True returns 30.
     """
     if double_xp:
         return 30

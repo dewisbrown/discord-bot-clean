@@ -92,7 +92,6 @@ class BattlepassCog(commands.Cog):
 
             # Check if it has been at least 15 minutes
             if time_since_redemption.total_seconds() >= 900: # 15 minutes
-                level = db.retrieve_level(user_id=user_id)
                 points = db.retrieve_points(user_id=user_id)
 
                 db.update_points(user_id=user_id, points=(utils.points(False) + points))

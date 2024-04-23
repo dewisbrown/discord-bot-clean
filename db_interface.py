@@ -236,11 +236,11 @@ def retrieve_owned_item(user_id: int, item_name: str):
     return cursor.fetchone()
 
 
-def create_item_submission(
+def create_shop_submission(
         user_id: int, user_name: str,
         item_name: str, value: int, rarity: str) -> None:
     """
-    Creates item in item_submissions table.
+    Creates shop item in item_submissions table.
     """
     # Connect to the database
     conn = sqlite3.connect(DB_FILE)

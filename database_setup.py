@@ -38,5 +38,14 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS shop (
                 )''')
 conn.commit()
 
+# Create a table to store bot command requests
+cursor.execute('''CREATE TABLE IF NOT EXISTS command_requests (
+                    user_id INTEGER,
+                    guild_id INTEGER,
+                    command TEXT,
+                    cog TEXT
+               )''')
+conn.commit()
+
 # Close the connection
 conn.close()

@@ -59,9 +59,9 @@ def retrieve_points(user_id: int):
     return result[0]
 
 
-def retrieve_last_awarded_at(user_id: int):
+def retrieve_redemption_time(user_id: int):
     """
-    Retrieves timestamp of last point redemeption for a user.
+    Retrieves timestamp of last point redemption for a user.
     """
     # Connect to the database
     conn = sqlite3.connect(DB_FILE)
@@ -78,7 +78,7 @@ def retrieve_last_awarded_at(user_id: int):
         return None
 
 
-def update_last_awarded_at(user_id: int, current_time):
+def update_redemption_time(user_id: int, current_time):
     """
     Updates timestamp for most recent point redemption for a user.
     """

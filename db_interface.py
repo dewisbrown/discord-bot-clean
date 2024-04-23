@@ -28,7 +28,7 @@ def get_user_id(user_id):
     return cursor.fetchone()
 
 
-def create_user(user_id: int, last_awarded_at, user_name: str, guild_id: int):
+def create_user(user_id: int, redemption_time, user_name: str, guild_id: int):
     """
     Enters user into battlepass table.
     """
@@ -37,9 +37,9 @@ def create_user(user_id: int, last_awarded_at, user_name: str, guild_id: int):
     cursor = conn.cursor()
 
     cursor.execute('''INSERT INTO battlepass (
-                   user_id, guild_id, points, last_awarded_at, 
-                   level, user_name) VALUES (?, ?, ?, ?, ?, ?)''', 
-                   (user_id, guild_id, 100, last_awarded_at, 1, user_name))
+                   user_id, guild_id, points, redemption_time, 
+                   level, user_name) VALUES (?, ?, ?, ?, ?, ?)''',
+                   (user_id, guild_id, 25, redemption_time, 1, user_name))
     conn.commit()
 
 

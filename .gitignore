@@ -1,15 +1,6 @@
-# Cog files to ignore
-ed.py
-translate.py
-
-# Image folder for bot
+# Folders to ignore
 images/
-
-# Other files to ignore
-ed_urls.csv
-categorized_items.json
-shop.csv
-ed_sayings.txt
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

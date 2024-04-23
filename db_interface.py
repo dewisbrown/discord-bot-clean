@@ -234,3 +234,21 @@ def retrieve_owned_item(user_id: int, item_name: str):
     cursor.execute(query, (user_id, item_name))
 
     return cursor.fetchone()
+
+
+def create_command_request(user_id: int, guild_id: int, command: str, cog: str) -> None:
+    """
+    Creates record in command_request table.
+    """
+    # Connect to sqlite database (make new if doesn't exist)
+    conn = sqlite3.connect(DB_FILE)
+
+    # Create a cursor object to execute SQL commands
+    cursor = conn.cursor()
+
+    query = '''INSERT INTO command_requests 
+            (user_id, guild_id, command, cog) 
+            VALUES (?, ?, ?, ?)'''
+    cursor.execute(query, (user_id, guild_id, command, cog))
+    conn.commit()
+    conn.close()

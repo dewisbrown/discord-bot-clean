@@ -38,6 +38,16 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS shop (
                 )''')
 conn.commit()
 
+# Create a table to store shop items
+cursor.execute('''CREATE TABLE IF NOT EXISTS shop_submissions (
+                    user_id INT,
+                    item_name TEXT,
+                    value INTEGER,
+                    rarity TEXT,
+                    image_url TEXT
+                )''')
+conn.commit()
+
 # Create a table to store bot command requests
 cursor.execute('''CREATE TABLE IF NOT EXISTS command_requests (
                     user_id INTEGER,

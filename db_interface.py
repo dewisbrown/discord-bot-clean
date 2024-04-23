@@ -246,7 +246,7 @@ def create_command_request(user_id: int, guild_id: int, command: str, cog: str) 
     # Create a cursor object to execute SQL commands
     cursor = conn.cursor()
 
-    query = '''INSERT INTO command_requests 
+    query = '''INSERT INTO command_requests
             (user_id, guild_id, command, cog) 
             VALUES (?, ?, ?, ?)'''
     cursor.execute(query, (user_id, guild_id, command, cog))

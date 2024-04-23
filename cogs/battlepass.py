@@ -141,8 +141,8 @@ class BattlepassCog(commands.Cog):
         guild_id = ctx.author.guild.id
         guild_name = ctx.author.guild.name
 
-        current_level = db.get_level(user_id=user_id)
-        points = db.get_points(user_id=user_id)
+        current_level = db.retrieve_level(user_id=user_id)
+        points = db.retrieve_points(user_id=user_id)
 
         if points:
             points_to_level_up = utils.points_to_level_up(current_level)
@@ -150,14 +150,24 @@ class BattlepassCog(commands.Cog):
             embed.set_author(name=user_name, icon_url=ctx.author.avatar)
 
             if points >= points_to_level_up:
-                db.set_level(user_id=user_id, level=(current_level + 1))
-                db.set_points(user_id=user_id, points=(points - points_to_level_up))
+                db.update_level(user_id=user_id, level=(current_level + 1))
+                db.update_points(user_id=user_id, points=(points - points_to_level_up))
 
                 embed.set_thumbnail(url='https://res.cloudinary.com/teepublic/image/private/s--V423wCbg--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/t_watermark_lock/c_limit,f_auto,h_630,q_90,w_630/v1535464012/production/designs/3077990_0.jpg')
                 embed.add_field(name=f'You leveled up to level: {current_level + 1}', value=f'Points after tier up: {points - points_to_level_up}', inline=False)
+
+                logging.info('[%s:%s] spent %s points to level up in server [%s:%s]',
+                             user_name, utils.decimal_to_hex(user_id),
+                             points_to_level_up,
+                             guild_name, utils.decimal_to_hex(guild_id)
+                            )
                 await ctx.send(embed=embed)
             else:
                 embed.add_field(name=f'You need {points_to_level_up} points to level up.', value=f'Your points: {points}', inline=False)
+                logging.info('[%s:%s] denied tierup in server [%s:%s]',
+                             user_name, utils.decimal_to_hex(user_id),
+                             guild_name, utils.decimal_to_hex(guild_id)
+                            )
                 await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the database yet. Use `$register` to enter yourself.')
@@ -168,10 +178,13 @@ class BattlepassCog(commands.Cog):
         '''Returns the users current level and points.'''
         logging.info('Battlepass command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
+        user_name = ctx.author.name
+        guild_id = ctx.author.guild.id
+        guild_name = ctx.author.guild.name
 
         # Get user points and level
-        points = db.get_points(user_id=user_id)
-        level = db.get_level(user_id=user_id)
+        points = db.retrieve_points(user_id=user_id)
+        level = db.retrieve_level(user_id=user_id)
 
         if points:
             embed = discord.Embed(title='Battlepass Progress', timestamp=datetime.datetime.now())
@@ -190,7 +203,7 @@ class BattlepassCog(commands.Cog):
         embed = discord.Embed(title='Top 5 Battlepass Members', description='Sorted by level and points.', timestamp=datetime.datetime.now())
         embed.set_thumbnail(url='https://ih1.redbubble.net/image.660900869.4748/pp,504x498-pad,600x600,f8f8f8.u8.jpg')
 
-        results = db.get_top_five()
+        results = db.retrieve_top_five()
         for result in results:
             user_name, level, points = result
             embed.add_field(name=user_name, value=f'Level: {level} Points: {points}', inline=False)

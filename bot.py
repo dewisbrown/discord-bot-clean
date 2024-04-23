@@ -43,8 +43,7 @@ async def load():
     cog_files = [f.split('.')[0] for f in os.listdir(cogs_directory) if f.endswith('.py')]
 
     for cog in cog_files:
-        if cog != 'translate':  # this can be removed if no translate.py cog in your cogs folder
-            await bot.load_extension(f'cogs.{cog}')
+        await bot.load_extension(f'cogs.{cog}')
 
 
 async def main():

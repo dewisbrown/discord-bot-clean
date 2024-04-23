@@ -236,6 +236,7 @@ def retrieve_owned_item(user_id: int, item_name: str):
     return cursor.fetchone()
 
 
+# Currently not in use, not sure if needed or wanted.
 def create_command_request(user_id: int, guild_id: int, command: str, cog: str) -> None:
     """
     Creates record in command_request table.

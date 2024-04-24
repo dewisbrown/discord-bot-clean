@@ -222,5 +222,18 @@ class BattlepassCog(commands.Cog):
         await ctx.send(embed=embed)
 
 
+    @commands.command()
+    async def submit_item(self, ctx):
+        """
+        Allows item submissions for item shop.
+        """
+        logging.info('Submit Item command submitted by [%s]', ctx.author.name)
+
+        user_id = ctx.author.id
+        user_name = ctx.author.name
+        guild_id = ctx.author.guild.id
+        guild_name = ctx.author.guild.name
+
+        
 async def setup(bot):
     await bot.add_cog(BattlepassCog(bot))

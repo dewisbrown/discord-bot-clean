@@ -222,30 +222,5 @@ class BattlepassCog(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command()
-    async def submit_item(self, ctx, *args):
-        """
-        Allows item submissions for item shop.
-        """
-        logging.info('Submit Item command submitted by [%s]', ctx.author.name)
-
-        user_id = ctx.author.id
-        user_name = ctx.author.name
-        guild_id = ctx.author.guild.id
-        guild_name = ctx.author.guild.name
-
-        if len(args) != 3:
-            embed = discord.Embed(title='Submit Item', description='Command used to submit item shop ideas.')
-            embed.add_field(name='Command syntax', value='`$submit_item "item name", value, "rarity"`', inline=False)
-            embed.add_field(name='Valid Rarities', value='Legendary, Very Rare, Rare, Uncommon, Common', inline=False)
-            embed.add_field(name='Example', value='`$submit_item "Winton", 1000, "Legendary"`', inline=False)
-            await ctx.send(embed=embed)
-        else:
-            return
-            # check if item name is valid
-            # check if item value is greater than 0
-            # check if rarity is valid
-
-        
 async def setup(bot):
     await bot.add_cog(BattlepassCog(bot))

@@ -53,7 +53,7 @@ def command_info(command: str) -> dict | None:
         'syntax': '`$battlepass`',
         'example': '`$battlepass`',
     }
-    points = {
+    _points = {
         'description': 'Gain points every 15 minutes.',
         'syntax': '`$points`',
         'example': '`$points`',
@@ -147,7 +147,7 @@ def command_info(command: str) -> dict | None:
     commands = {
         'help': _help,
         'battlepass': battlepass,
-        'points': points,
+        'points': _points,
         'register': register,
         'tierup': tierup,
         'top5': top5,

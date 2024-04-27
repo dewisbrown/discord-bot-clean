@@ -34,19 +34,24 @@ class ModerationCog(commands.Cog):
         # bot returns embed similar to submit_item embed already made
         # in battlepass cog
     @commands.command()
-    async def help(self, ctx, command=None):
+    async def help(self, ctx, command: str=None):
         """
         If a command name is submitted with this command,
         help for the command is returned. No command returns
         a list of all commands.
         """
-        embed = discord.Embed(timestamp=datetime.datetime.now())
-        info = utils.command_info(command=command)
+        logging.info('Help command submitted by [%s]', ctx.author.name)
 
-        if command and info:
-            embed = discord.Embed(title=command, description=info['description'])
-            embed.add_field(name='Command syntax', value=info['syntax'], inline=False)
-            embed.add_field(name='Example', value=info['example'], inline=False)
+        embed = discord.Embed(timestamp=datetime.datetime.now())
+
+        if command:
+            info = utils.command_info(command=command)
+            if info:
+                embed = discord.Embed(title=f'Command Help - {command.capitalize()}', description=info['description'])
+                embed.add_field(name='Command syntax', value=info['syntax'], inline=False)
+                embed.add_field(name='Example', value=info['example'], inline=False)
+            else:
+                await ctx.send(f'There is no command `${command}`. Submit `$help` to see list of commands.')
         else:
             battlepass_commands = f'''`$battlepass` - {utils.command_info('battlepass')['description']}\n
                         `$points` - {utils.command_info('points')['description']}\n
@@ -72,6 +77,8 @@ class ModerationCog(commands.Cog):
                         `$mark` - {utils.command_info('mark')['description']}'''
 
             # All commands
+            embed.title = 'Command Help'
+            embed.description = 'List of all bot commands. Use `$help <command>` for more information on each command.'
             embed.add_field(name='Battlepass Commands', value=battlepass_commands, inline=False)
             embed.add_field(name='', value='', inline=False)
             embed.add_field(name='Shop Commands', value=shop_commands, inline=False)

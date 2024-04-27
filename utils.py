@@ -43,6 +43,11 @@ def command_info(command: str) -> dict | None:
     """
     Grabs info for moderation.help command embeds.
     """
+    _help = {
+        'description': 'Displays information for bot commands.',
+        'syntax': '`$help`\n`$help <command>`',
+        'example': '`$help battlepass`',
+    }
     battlepass = {
         'description': 'Displays level and points for user.',
         'syntax': '`$battlepass`',
@@ -140,6 +145,7 @@ def command_info(command: str) -> dict | None:
     }
 
     commands = {
+        'help': _help,
         'battlepass': battlepass,
         'points': points,
         'register': register,

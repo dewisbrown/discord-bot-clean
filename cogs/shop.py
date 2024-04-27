@@ -166,7 +166,7 @@ class ShopCog(commands.Cog):
                 description='You have successfully submitted an item.',
                 timestamp=datetime.datetime.now()
                 )
-            embed.add_field(name=item_name, value=f'Rarity: {rarity}, Value: {value}', inline=False)
+            embed.add_field(name=item_name, value=f'Rarity: {rarity}\nValue: {value}', inline=False)
             await ctx.send(embed=embed)
 
 

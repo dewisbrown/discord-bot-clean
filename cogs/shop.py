@@ -39,7 +39,7 @@ class ShopCog(commands.Cog):
     async def inventory(self, ctx):
         '''Lists the user's inventory.'''
         user_id = ctx.author.id
-        items = db.get_inventory(user_id=user_id)
+        items = db.retrieve_inventory(user_id=user_id)
 
         if items:
             embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
@@ -71,13 +71,13 @@ class ShopCog(commands.Cog):
             return
 
         # Check if user already owns the item
-        owned_item = db.get_owned_item(user_id=user_id, item_name=item_name)
+        owned_item = db.retrieve_owned_item(user_id=user_id, item_name=item_name)
         if owned_item:
             await ctx.send('You already own this item.')
             return
 
         # Check if user has enough points to purchase item
-        points = int(db.get_points(user_id=user_id))
+        points = int(db.retrieve_points(user_id=user_id))
         for item in shop:
             if item_name == item[0]:
                 item_value = item[1]
@@ -89,10 +89,10 @@ class ShopCog(commands.Cog):
 
         if points >= item_value:
             # Deduct item value from user points
-            db.set_points(user_id=user_id, points=points - item_value)
+            db.update_points(user_id=user_id, points=points - item_value)
 
             # Add item to user inventory
-            db.add_to_inventory(
+            db.update_inventory(
                 user_id=user_id,
                 item_name=item_name,
                 item_value=item_value,
@@ -112,7 +112,7 @@ class ShopCog(commands.Cog):
 async def refresh_shop():
     '''Updates shop with five new items every thirty minutes.'''
     global shop
-    shop = db.get_shop_items()
+    shop = db.retrieve_shop_items()
 
     current_time = datetime.datetime.now(pytz.timezone('US/Central'))
     set_shop_refresh_time(current_time + datetime.timedelta(minutes=30))

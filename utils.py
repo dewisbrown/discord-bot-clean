@@ -39,7 +39,7 @@ def points_to_level_up(level: int) -> int:
     return 10 * level + 90
 
 
-def command_info(command: str) -> dict:
+def command_info(command: str) -> dict | None:
     """
     Grabs info for moderation.help command embeds.
     """
@@ -161,4 +161,6 @@ def command_info(command: str) -> dict:
         'mark': mark
     }
 
-    return commands[command]
+    if command in commands.keys():
+        return commands[command]
+    return None

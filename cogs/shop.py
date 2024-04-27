@@ -108,6 +108,68 @@ class ShopCog(commands.Cog):
         await ctx.send(embed=embed)
 
 
+    @commands.command()
+    async def submit_item(self, ctx, *, args):
+        """
+        Allows item submissions for item shop.
+        """
+        logging.info('Submit Item command submitted by [%s]', ctx.author.name)
+
+        user_id = ctx.author.id
+        user_name = ctx.author.name
+        guild_id = ctx.author.guild.id
+        guild_name = ctx.author.guild.name
+
+        split_args: list[str] = args.split(',')
+        if len(split_args) != 3:
+            await ctx.send('Use `$help submit_item` for more information.')
+        else:
+            item_name = split_args[0].strip()
+            try:
+                value = int(split_args[1].strip())
+            except ValueError:
+                await ctx.send('Submit a positive, whole number for value.')
+                return
+            rarity = split_args[2].strip()
+
+            # Verify all args are valid
+            if len(item_name) == 0:
+                await ctx.send('Item name was blank.')
+                return
+            if value < 1:
+                await ctx.send('Submit a positive, whole number for value.')
+                return
+
+            rarities = [
+                'Legendary',
+                'Very Rare',
+                'Rare',
+                'Uncommon',
+                'Common'
+            ]
+
+            if rarity not in rarities:
+                await ctx.send('Invalid rarity submitted. Use `$help submit_item` for more information.')
+                return
+
+            # If all args are valid, add to shop_submission table
+            db.create_shop_submission(
+                user_id=user_id,
+                user_name=user_name,
+                item_name=item_name,
+                value=value,
+                rarity=rarity
+            )
+
+            embed = discord.Embed(
+                title='Item Shop Submission',
+                description='You have successfully submitted an item.',
+                timestamp=datetime.datetime.now()
+                )
+            embed.add_field(name=item_name, value=f'Rarity: {rarity}, Value: {value}', inline=False)
+            await ctx.send(embed=embed)
+
+
 @tasks.loop(minutes=30)
 async def refresh_shop():
     '''Updates shop with five new items every thirty minutes.'''

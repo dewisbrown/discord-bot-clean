@@ -247,8 +247,8 @@ def create_shop_submission(
     cursor = conn.cursor()
 
     query = '''INSERT INTO shop_submissions
-            (user_id, item_name, value, rarity)
-            VALUES (?, ?, ?, ?)'''
+            (user_id, user_name, item_name, value, rarity)
+            VALUES (?, ?, ?, ?, ?)'''
 
     cursor.execute(query,(user_id, user_name, item_name, value, rarity))
     conn.commit()

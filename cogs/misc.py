@@ -142,16 +142,16 @@ class MiscCog(commands.Cog):
     
 
     @commands.command()
-    async def game(self, ctx, *args):
+    async def game(self, ctx, *, args):
         '''User inputs game titles and the command returns a random title.'''
         logging.info('Game command submitted by [%s]', ctx.author.name)
-        games = list(args)
+        games: list[str] = args.split(',')
 
         if not games:
             await ctx.send("No game titles provided.")
             return
 
-        random_choice = random.choice(games)
+        random_choice = random.choice(games).strip()
 
         await ctx.send(f'You should play {random_choice}.')
 

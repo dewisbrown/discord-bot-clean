@@ -1,9 +1,22 @@
+import os
+import sys
 import datetime
 import logging
 import discord
 import requests
 from discord.ext import commands
 from bs4 import BeautifulSoup
+
+# Get the current and parent directories
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
+
+# Append the parent directory to the system path
+sys.path.append(parent_dir)
+
+# Import from parent directory
+import utils
+
 
 class ModerationCog(commands.Cog):
     '''Commands for discord moderation.'''
@@ -21,41 +34,52 @@ class ModerationCog(commands.Cog):
         # bot returns embed similar to submit_item embed already made
         # in battlepass cog
     @commands.command()
-    async def help(self, ctx):
-        '''Lists bot commands.'''
+    async def help(self, ctx, command=None):
+        """
+        If a command name is submitted with this command,
+        help for the command is returned. No command returns
+        a list of all commands.
+        """
         embed = discord.Embed(timestamp=datetime.datetime.now())
+        info = utils.command_info(command=command)
 
-        battlepass_commands = '''`$battlepass` - Displays level and points for user.\n
-                    `$points` - Gain points every 15 minutes.\n
-                    `$register` - Register for battlepass.\n
-                    `$tierup` - Spend points to increase battlepass level.\n
-                    `$top5` - Displays top 5 battlepass members.'''
+        if command and info:
+            embed = discord.Embed(title=command, description=info['description'])
+            embed.add_field(name='Command syntax', value=info['syntax'], inline=False)
+            embed.add_field(name='Example', value=info['example'], inline=False)
+        else:
+            battlepass_commands = f'''`$battlepass` - {utils.command_info('battlepass')['description']}\n
+                        `$points` - {utils.command_info('points')['description']}\n
+                        `$register` - {utils.command_info('register')['description']}\n
+                        `$tierup` - {utils.command_info('tierup')['description']}\n
+                        `$top5` - {utils.command_info('top5')['description']}'''
 
-        shop_commands = '''`$buy <item_name>` - Purchase item from item shop.\n
-                    `$inventory` - Displays user inventory.\n
-                    `$shop` - Displays shop items and values, refreshes every thirty minutes.'''
+            shop_commands = f'''`$buy` - {utils.command_info('buy')['description']}\n
+                        `$inventory` - {utils.command_info('inventory')['description']}\n
+                        `$shop` - {utils.command_info('shop')['description']}\n
+                        `$submit_item` - {utils.command_info('submit_item')['description']}'''
 
-        music_commands = '''`$play <youtube_url>` - Plays supplied YouTube video audio in voice channel.\n
-                    `$play <search_terms>` - Plays first search result of YouTube video audio in voice channel.\n
-                    `$queue` - Displays the music queue.\n
-                    `$stop` - Stops the music player and the bot exits the voice channel.\n'''
+            music_commands = f'''`$play` - {utils.command_info('play')['description']}\n
+                        `$queue` - {utils.command_info('queue')['description']}\n
+                        `$stop` - {utils.command_info('stop')['description']}\n'''
 
-        misc_commands = '''`$game <title1> <title2> ...` - Bot selects random game title out of provided game titles.\n
-                    `$age` - Displays user time since joining server.\n
-                    `$updates` - Displays recent changes made to GummyBot.\n
-                    `$ufc` - Displays next four UFC event dates, times, and titles.\n
-                    `$elijah` - Displays days since Elijah joined.\n
-                    `$mark` - Displays days since Mark joined.'''
+            misc_commands = f'''`$game` - {utils.command_info('game')['description']}\n
+                        `$discordstatus` - {utils.command_info('discordstatus')['description']}\n
+                        `$age` - {utils.command_info('age')['description']}\n
+                        `$updates` - {utils.command_info('updates')['description']}\n
+                        `$ufc` - {utils.command_info('ufc')['description']}\n
+                        `$elijah` - {utils.command_info('elijah')['description']}\n
+                        `$mark` - {utils.command_info('mark')['description']}'''
 
-        # All commands
-        embed.add_field(name='Battlepass Commands', value=battlepass_commands, inline=False)
-        embed.add_field(name='', value='', inline=False)
-        embed.add_field(name='Shop Commands', value=shop_commands, inline=False)
-        embed.add_field(name='', value='', inline=False)
-        embed.add_field(name='Music Commands', value=music_commands, inline=False)
-        embed.add_field(name='', value='', inline=False)
-        embed.add_field(name='Misc Commands', value=misc_commands, inline=False)
-        embed.add_field(name='', value='', inline=False)
+            # All commands
+            embed.add_field(name='Battlepass Commands', value=battlepass_commands, inline=False)
+            embed.add_field(name='', value='', inline=False)
+            embed.add_field(name='Shop Commands', value=shop_commands, inline=False)
+            embed.add_field(name='', value='', inline=False)
+            embed.add_field(name='Music Commands', value=music_commands, inline=False)
+            embed.add_field(name='', value='', inline=False)
+            embed.add_field(name='Misc Commands', value=misc_commands, inline=False)
+            embed.add_field(name='', value='', inline=False)
 
         await ctx.send(embed=embed)
 

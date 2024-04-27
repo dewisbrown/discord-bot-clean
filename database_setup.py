@@ -44,7 +44,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS shop_submissions (
                     user_name TEXT,
                     item_name TEXT,
                     value INTEGER,
-                    rarity TEXT,
+                    rarity TEXT
                 )''')
 conn.commit()
 

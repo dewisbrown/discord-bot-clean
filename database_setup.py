@@ -41,10 +41,10 @@ conn.commit()
 # Create a table to store shop items
 cursor.execute('''CREATE TABLE IF NOT EXISTS shop_submissions (
                     user_id INT,
+                    user_name TEXT,
                     item_name TEXT,
                     value INTEGER,
                     rarity TEXT,
-                    image_url TEXT
                 )''')
 conn.commit()
 

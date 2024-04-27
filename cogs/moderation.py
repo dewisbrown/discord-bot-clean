@@ -29,10 +29,7 @@ class ModerationCog(commands.Cog):
         '''Prints when cog is loaded.'''
         logging.info('Moderation Cog loaded.')
 
-    # TODO: Add arg for help() to display embed for each command.
-        # example: $help points
-        # bot returns embed similar to submit_item embed already made
-        # in battlepass cog
+
     @commands.command()
     async def help(self, ctx, command: str=None):
         """

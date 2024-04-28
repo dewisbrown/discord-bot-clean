@@ -90,7 +90,7 @@ def command_info(command: str) -> dict | None:
     }
     submit_item = {
         'description': 'Submit item shop ideas.',
-        'syntax': '`$submit_item "<item_name>", <value>, "<rarity>"`',
+        'syntax': '`$submit_item <item_name>, <value>, <rarity>`',
         'example': '`$submit_item "Winton Plush", 10000, "Legendary"`',
     }
     play = {

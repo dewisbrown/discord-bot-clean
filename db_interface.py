@@ -5,11 +5,8 @@ Provides a way to input and retreive data from database.
 
 import sqlite3
 import os
-from dotenv import load_dotenv
 
 
-# Load db file path from .env file
-load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'data/battlepass.db')
 

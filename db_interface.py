@@ -5,11 +5,8 @@ Provides a way to input and retreive data from database.
 
 import sqlite3
 import os
-from dotenv import load_dotenv
 
 
-# Load db file path from .env file
-load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'data/battlepass.db')
 
@@ -254,6 +251,19 @@ def create_shop_submission(
     conn.commit()
 
 
+def retrieve_shop_submission(item_name: str):
+    """
+    Retrieves shop submission by name.
+    """
+    # Connect to the database
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    query = 'SELECT * FROM shop_submissions WHERE item_name = ?'
+    cursor.execute(query, (item_name))
+    return cursor.fetchone()
+
+
 # Currently not in use, not sure if needed or wanted.
 def create_command_request(user_id: int, guild_id: int, command: str, cog: str) -> None:
     """
@@ -271,3 +281,18 @@ def create_command_request(user_id: int, guild_id: int, command: str, cog: str) 
     cursor.execute(query, (user_id, guild_id, command, cog))
     conn.commit()
     conn.close()
+
+
+def create_vote(user_id: int, vote_time: str, item_id: int) -> None:
+    """
+    Creates vote record in vote table.
+    """
+    # Connect to sqlite database (make new if doesn't exist)
+    conn = sqlite3.connect(DB_FILE)
+
+    # Create a cursor object to execute SQL commands
+    cursor = conn.cursor()
+
+    # Check if submitted vote item exists
+    query = 'SELECT item_name FROM shop_submissions WHERE item_id = ?'
+    cursor.execute(query, (item_id))

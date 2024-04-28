@@ -40,11 +40,23 @@ conn.commit()
 
 # Create a table to store shop items
 cursor.execute('''CREATE TABLE IF NOT EXISTS shop_submissions (
-                    user_id INT,
+                    item_id INTEGER PRIMARY KEY,
+                    user_id INTEGER,
                     user_name TEXT,
+                    date TIMESTAMP,
                     item_name TEXT,
                     value INTEGER,
                     rarity TEXT
+                )''')
+conn.commit()
+
+# Create a table to store shop items
+cursor.execute('''CREATE TABLE IF NOT EXISTS votes (
+                    vote_id INTEGER PRIMARY KEY,
+                    user_id INTEGER,
+                    vote_time TIMESTAMP,
+                    item_id INTEGER,
+                    FOREIGN KEY (item_id) REFERENCES shop_submissions(item_id)
                 )''')
 conn.commit()
 
@@ -53,7 +65,8 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS command_requests (
                     user_id INTEGER,
                     guild_id INTEGER,
                     command TEXT,
-                    cog TEXT
+                    cog TEXT,
+                    date TIMESTAMP
                )''')
 conn.commit()
 

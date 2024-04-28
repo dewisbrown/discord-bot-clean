@@ -170,6 +170,18 @@ class ShopCog(commands.Cog):
             await ctx.send(embed=embed)
 
 
+    @commands.command()
+    async def vote(self, ctx, *, item_name):
+        """
+        Command to vote for shop item submissions.
+        """
+        logging.info('Vote command submitted by [%s]', ctx.author.name)
+        user_id = ctx.author.id
+        user_name = ctx.author.name
+        guild_id = ctx.author.guild.id
+        guild_name = ctx.author.guild.name
+
+
 @tasks.loop(minutes=30)
 async def refresh_shop():
     '''Updates shop with five new items every thirty minutes.'''

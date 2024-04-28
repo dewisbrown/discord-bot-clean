@@ -42,6 +42,7 @@ conn.commit()
 cursor.execute('''CREATE TABLE IF NOT EXISTS shop_submissions (
                     user_id INT,
                     user_name TEXT,
+                    date TIMESTAMP,
                     item_name TEXT,
                     value INTEGER,
                     rarity TEXT
@@ -53,7 +54,8 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS command_requests (
                     user_id INTEGER,
                     guild_id INTEGER,
                     command TEXT,
-                    cog TEXT
+                    cog TEXT,
+                    date TIMESTAMP
                )''')
 conn.commit()
 

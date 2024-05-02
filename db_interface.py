@@ -181,7 +181,7 @@ def retrieve_top_five():
     cursor = conn.cursor()
 
     # Checks top 5 users
-    cursor.execute('''SELECT user_name, level, points FROM points
+    cursor.execute('''SELECT user_name, level, points FROM battlepass
                    ORDER BY level DESC, points DESC LIMIT 5''')
     return cursor.fetchall()
 

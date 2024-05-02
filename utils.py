@@ -89,9 +89,9 @@ def command_info(command: str) -> dict | None:
         'example': '`$shop`',
     }
     submit_item = {
-        'description': 'Submit item shop ideas.',
+        'description': 'Submit item shop ideas.\nValid rarities:\nLegendary, Very Rare, Rare, Uncommon, Common',
         'syntax': '`$submit_item <item_name>, <value>, <rarity>`',
-        'example': '`$submit_item "Winton Plush", 10000, "Legendary"`',
+        'example': '`$submit_item Winton Plush, 10000, Legendary`',
     }
     play = {
         'description': 'Plays YouTube video audio in voice channel.',

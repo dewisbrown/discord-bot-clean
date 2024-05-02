@@ -36,7 +36,7 @@ def create_user(user_id: int, redemption_time, user_name: str, guild_id: int):
     cursor.execute('''INSERT INTO battlepass (
                    user_id, guild_id, points, redemption_time, 
                    level, user_name) VALUES (?, ?, ?, ?, ?, ?)''',
-                   (user_id, guild_id, 25, redemption_time, 1, user_name))
+                   (user_id, guild_id, 20, redemption_time, 1, user_name))
     conn.commit()
 
 
@@ -65,7 +65,7 @@ def retrieve_redemption_time(user_id: int):
     cursor = conn.cursor()
 
     # Check the last awarded timestamp for the user
-    cursor.execute('SELECT last_awarded_at FROM battlepass WHERE user_id = ?', (user_id,))
+    cursor.execute('SELECT redemption_time FROM battlepass WHERE user_id = ?', (user_id,))
     result = cursor.fetchone()
     conn.close()
 
@@ -84,7 +84,7 @@ def update_redemption_time(user_id: int, current_time):
     cursor = conn.cursor()
 
     # Check the last awarded timestamp for the user
-    cursor.execute('''UPDATE battlepass SET last_awarded_at = ?
+    cursor.execute('''UPDATE battlepass SET redemption_time = ?
                    WHERE user_id = ?''', (current_time, user_id))
     conn.commit()
     conn.close()

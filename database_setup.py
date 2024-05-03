@@ -33,7 +33,7 @@ conn.commit()
 cursor.execute('''CREATE TABLE IF NOT EXISTS shop (
                     item_name TEXT,
                     rarity TEXT,
-                    image_url TEXT
+                    img_url TEXT
                 )''')
 conn.commit()
 

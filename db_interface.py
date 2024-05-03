@@ -235,7 +235,7 @@ def retrieve_owned_item(user_id: int, item_name: str):
 
 def create_shop_submission(
         user_id: int, user_name: str,
-        item_name: str, value: int, rarity: str) -> None:
+        item_name: str, rarity: str) -> None:
     """
     Creates shop item in item_submissions table.
     """
@@ -244,10 +244,10 @@ def create_shop_submission(
     cursor = conn.cursor()
 
     query = '''INSERT INTO shop_submissions
-            (user_id, user_name, item_name, value, rarity)
-            VALUES (?, ?, ?, ?, ?)'''
+            (user_id, user_name, item_name, rarity)
+            VALUES (?, ?, ?, ?)'''
 
-    cursor.execute(query,(user_id, user_name, item_name, value, rarity))
+    cursor.execute(query,(user_id, user_name, item_name, rarity))
     conn.commit()
 
 

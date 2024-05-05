@@ -8,7 +8,7 @@ import os
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(BASE_DIR, 'data/test.db') # change back to battlepass.db
+DB_FILE = os.path.join(BASE_DIR, 'data/battlepass.db') # change to test.db for testing
 
 
 def get_user_id(user_id):

@@ -1,4 +1,4 @@
-import logging, datetime, math
+import logging, datetime, math, random
 import discord, pytz
 from discord.ext import commands, tasks
 import db_interface as db
@@ -162,7 +162,6 @@ class ShopCog(commands.Cog):
                 user_name=user_name,
                 submit_time=datetime.datetime.now(),
                 item_name=item_name,
-                value=value,
                 rarity=rarity
             )
 

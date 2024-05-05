@@ -8,7 +8,7 @@ import os
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(BASE_DIR, 'data/battlepass.db')
+DB_FILE = os.path.join(BASE_DIR, 'data/test.db') # change back to battlepass.db
 
 
 def get_user_id(user_id):
@@ -233,6 +233,23 @@ def retrieve_owned_item(user_id: int, item_name: str):
     return cursor.fetchone()
 
 
+def create_shop_item(item_name: str, rarity: str, img_url: str):
+    """
+    Enter shop item info to db table.
+    """
+    # Connect to sqlite database (make new if doesn't exist)
+    conn = sqlite3.connect(DB_FILE)
+
+    # Create a cursor object to execute SQL commands
+    cursor = conn.cursor()
+
+    query = '''INSERT INTO shop (item_name, rarity, img_url) 
+                VALUES (?, ?, ?)'''
+    cursor.execute(query, (item_name, rarity, img_url))
+    conn.commit()
+    conn.close()
+
+
 def create_shop_submission(
         user_id: int, user_name: str,
         item_name: str, rarity: str) -> None:
@@ -249,6 +266,7 @@ def create_shop_submission(
 
     cursor.execute(query,(user_id, user_name, item_name, rarity))
     conn.commit()
+    conn.close()
 
 
 def retrieve_shop_submission(item_name: str):

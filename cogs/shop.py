@@ -2,6 +2,7 @@ import logging, datetime, math
 import discord, pytz
 from discord.ext import commands, tasks
 import db_interface as db
+import discord.ext
 
 
 shop = {}
@@ -56,6 +57,7 @@ class ShopCog(commands.Cog):
     async def buy(self, ctx, *, item_name):
         '''Purchase item from shop.'''
         user_id = ctx.author.id
+        guild_id = ctx.author.guild.id
 
         # Check if user is registered for battlepass
         user = db.get_user_id(user_id=user_id)
@@ -66,46 +68,48 @@ class ShopCog(commands.Cog):
             return
 
         # Check if item is currently in shop
-        if item_name not in [item[0] for item in shop]:
+        item = shop.get(item_name)
+        if item:
+            # Check if user already owns the item
+            owned_item = db.retrieve_owned_item(user_id=user_id, item_name=item_name)
+            if owned_item:
+                await ctx.send('You already own this item.')
+                return
+
+            # Check if user has enough points to purchase item
+            points = int(db.retrieve_points(user_id=user_id))
+            rarity, img_url, value = item
+
+            embed = discord.Embed(title='Item Purchase', timestamp=datetime.datetime.now())
+            embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+
+            if points >= value:
+                # Deduct item value from user points
+                db.update_points(user_id=user_id, points=points - value)
+
+                # Add item to user inventory
+                db.update_inventory(
+                    user_id=user_id,
+                    guild_id=guild_id,
+                    item_name=item_name,
+                    value=value,
+                    rarity=rarity,
+                    img_url=img_url,
+                    purchase_date=datetime.datetime.now()
+                    )
+
+                embed.add_field(name=f'{item_name} has been added to your inventory', value='View your inventory by using `$inventory`.', inline=False)
+                embed.add_field(name='', value=f'Points after purchase: {points - value}', inline=False)
+            else:
+                embed.add_field(name=f'You do not have enough points to purchase {item_name}.', value='', inline=False)
+                embed.add_field(name='', value=f'Your points: {points}', inline=False)
+                embed.add_field(name='', value=f'{item_name}: {value} points.', inline=False)
+            await ctx.send(embed=embed)
+        else:
             await ctx.send(f'{item_name} is not in the shop. Use `$shop` to see items in the shop.')
             return
 
-        # Check if user already owns the item
-        owned_item = db.retrieve_owned_item(user_id=user_id, item_name=item_name)
-        if owned_item:
-            await ctx.send('You already own this item.')
-            return
-
-        # Check if user has enough points to purchase item
-        points = int(db.retrieve_points(user_id=user_id))
-        for item in shop:
-            if item_name == item[0]:
-                item_value = item[1]
-                item_rarity = item[2]
-                break
-
-        embed = discord.Embed(title='Item Purchase', timestamp=datetime.datetime.now())
-        embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
-
-        if points >= item_value:
-            # Deduct item value from user points
-            db.update_points(user_id=user_id, points=points - item_value)
-
-            # Add item to user inventory
-            db.update_inventory(
-                user_id=user_id,
-                item_name=item_name,
-                item_value=item_value,
-                item_rarity=item_rarity,
-                purchase_date=datetime.datetime.now())
-
-            embed.add_field(name=f'{item_name} has been added to your inventory', value='View your inventory by using `$inventory`.', inline=False)
-            embed.add_field(name='', value=f'Points after purchase: {points - item_value}', inline=False)
-        else:
-            embed.add_field(name=f'You do not have enough points to purchase {item_name}.', value='', inline=False)
-            embed.add_field(name='', value=f'Your points: {points}', inline=False)
-            embed.add_field(name='', value=f'{item_name}: {item_value} points.', inline=False)
-        await ctx.send(embed=embed)
+        
 
 
     @commands.command()

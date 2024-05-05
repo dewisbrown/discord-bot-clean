@@ -168,7 +168,7 @@ def update_inventory(user_id: int,
     # Extract data from item_info and add to inventory
     cursor.execute('''INSERT INTO inventory
                    (user_id, item_name, value, rarity, img_url, purchase_date) 
-                   VALUES (?, ?, ?, ?, ?)''',
+                   VALUES (?, ?, ?, ?, ?, ?)''',
                    (user_id, guild_id, item_name, value, rarity, img_url, purchase_date))
     conn.commit()
     conn.close()

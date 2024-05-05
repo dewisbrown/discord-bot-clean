@@ -251,7 +251,7 @@ def create_shop_item(item_name: str, rarity: str, img_url: str):
 
 
 def create_shop_submission(
-        user_id: int, user_name: str,
+        user_id: int, user_name: str, submit_time,
         item_name: str, rarity: str) -> None:
     """
     Creates shop item in item_submissions table.
@@ -261,10 +261,10 @@ def create_shop_submission(
     cursor = conn.cursor()
 
     query = '''INSERT INTO shop_submissions
-            (user_id, user_name, item_name, rarity)
-            VALUES (?, ?, ?, ?)'''
+            (user_id, user_name, submit_time, item_name, rarity)
+            VALUES (?, ?, ?, ?, ?)'''
 
-    cursor.execute(query,(user_id, user_name, item_name, rarity))
+    cursor.execute(query,(user_id, user_name, submit_time, item_name, rarity))
     conn.commit()
     conn.close()
 

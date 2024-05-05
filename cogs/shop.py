@@ -1,11 +1,10 @@
-import logging
-import datetime
-import discord
-import pytz
+import logging, datetime, math
+import discord, pytz
 from discord.ext import commands, tasks
 import db_interface as db
 
-shop = []
+
+shop = {}
 refresh_time = datetime.datetime.now()
 
 class ShopCog(commands.Cog):
@@ -28,9 +27,10 @@ class ShopCog(commands.Cog):
         embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
         embed.set_thumbnail(url='https://wallpapercave.com/wp/wp7879327.jpg')
 
-        for item in shop:
-            item_name, item_value, item_rarity = item
-            embed.add_field(name=item_name, value=f'Points: {item_value} - Rarity: {item_rarity}', inline=False)
+        for k, v in shop.items():
+            item_name = k
+            rarity, img_url, value = v
+            embed.add_field(name=item_name, value=f'Points: {value} - Rarity: {rarity}', inline=False)
 
         await ctx.send(embed=embed)
 
@@ -184,9 +184,15 @@ class ShopCog(commands.Cog):
 
 @tasks.loop(minutes=30)
 async def refresh_shop():
-    '''Updates shop with five new items every thirty minutes.'''
+    '''Updates shop with ten new items every thirty minutes.'''
     global shop
-    shop = db.retrieve_shop_items()
+    shop.clear()
+
+    shop_items = db.retrieve_shop_items()
+    for item in shop_items:
+        item_name, rarity, img_url = item
+        value = calculate_value(rarity)
+        shop[item_name] = [rarity, img_url, value]
 
     current_time = datetime.datetime.now(pytz.timezone('US/Central'))
     set_shop_refresh_time(current_time + datetime.timedelta(minutes=30))
@@ -196,6 +202,33 @@ def set_shop_refresh_time(timestamp):
     '''Updates shop refresh time whenever refresh_shop task runs.'''
     global refresh_time
     refresh_time = timestamp
+
+
+def calculate_value(rarity: str) -> int:
+    """
+    Uses defined ranges for rarities to choose value at random.
+    There is a higher chance to return the upper range of the rarity value.
+    """
+    rarity_price_ranges = {
+        'Common': [50, 100, 200],
+        'Uncommon': [200, 300, 500],
+        'Rare': [500, 600, 750],
+        'Very Rare': [750, 1000, 1500],
+        'Legendary': [1500, 2000, 3000]
+    }
+
+    if random.randrange(0, 9) < 3:
+        price = random.randrange(
+                    rarity_price_ranges[rarity][0],
+                    rarity_price_ranges[rarity][1]
+                )
+    else:
+        price = random.randrange(
+                    rarity_price_ranges[rarity][1],
+                    rarity_price_ranges[rarity][2]
+                )
+    
+    return math.ceil(price / 10.0) * 10
 
 
 async def setup(bot):

@@ -1,7 +1,7 @@
 import sqlite3
 
 
-conn = sqlite3.connect('data/test.db')
+conn = sqlite3.connect('data/battlepass.db')
 cursor = conn.cursor()
 try:
     cursor.execute('ALTER TABLE shop DROP COLUMN value')

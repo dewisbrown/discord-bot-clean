@@ -253,8 +253,11 @@ def create_shop_item(item_name: str, rarity: str, img_url: str):
 
 
 def create_shop_submission(
-        user_id: int, user_name: str, submit_time,
-        item_name: str, rarity: str) -> None:
+        user_id: int,
+        user_name: str,
+        submit_time,
+        item_name: str,
+        rarity: str) -> None:
     """
     Creates shop item in item_submissions table.
     """

@@ -175,15 +175,24 @@ class ShopCog(commands.Cog):
 
 
     @commands.command()
-    async def vote(self, ctx, *, item_name):
+    async def submissions(self, ctx):
         """
         Command to vote for shop item submissions.
         """
-        logging.info('Vote command submitted by [%s]', ctx.author.name)
+        logging.info('Submissions command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
         user_name = ctx.author.name
         guild_id = ctx.author.guild.id
         guild_name = ctx.author.guild.name
+
+        embed = discord.Embed(title='Item Submissions', timestamp=datetime.datetime.now())
+        embed.set_author(name=user_name)
+
+        items = db.retrieve_shop_submissions()
+        for item in items:
+            embed.add_field(name=f'{item[5]}: {item[4]}', value=f'Submitted by: {item[2]}', inline=False)
+
+        await ctx.send(embed=embed)
 
 
 @tasks.loop(minutes=30)
@@ -231,7 +240,7 @@ def calculate_value(rarity: str) -> int:
                     rarity_price_ranges[rarity][1],
                     rarity_price_ranges[rarity][2]
                 )
-    
+
     return math.ceil(price / 10.0) * 10
 
 

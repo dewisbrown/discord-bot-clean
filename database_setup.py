@@ -24,6 +24,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS inventory (
                     item_name TEXT,
                     value INTEGER,
                     rarity TEXT,
+                    img_url TEXT,
                     purchase_date TIMESTAMP,
                     FOREIGN KEY (user_id) REFERENCES battlepass (user_id)
                 )''')

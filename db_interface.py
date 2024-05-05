@@ -287,6 +287,17 @@ def retrieve_shop_submission(item_name: str):
     return cursor.fetchone()
 
 
+def retrieve_shop_submissions():
+    """
+    Retreives all shop submissions.
+    """
+    # Connect to the database
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM shop_submissions')
+    return cursor.fetchall()
+
+
 # Currently not in use, not sure if needed or wanted.
 def create_command_request(user_id: int, guild_id: int, command: str, cog: str) -> None:
     """

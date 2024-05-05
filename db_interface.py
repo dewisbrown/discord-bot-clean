@@ -186,7 +186,7 @@ def retrieve_top_five():
     return cursor.fetchall()
 
 
-def retrieve_shop_items():
+def retrieve_shop_items() -> list:
     """
     Retrieves ten items at random from shop table.
     """

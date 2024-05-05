@@ -160,6 +160,7 @@ class ShopCog(commands.Cog):
             db.create_shop_submission(
                 user_id=user_id,
                 user_name=user_name,
+                submit_time=datetime.datetime.now(),
                 item_name=item_name,
                 value=value,
                 rarity=rarity

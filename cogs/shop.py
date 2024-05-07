@@ -178,7 +178,7 @@ class ShopCog(commands.Cog):
         guild_name = ctx.author.guild.name
 
         embed = discord.Embed(title='Item Submissions', timestamp=datetime.datetime.now())
-        embed.set_author(name=user_name)
+        # embed.set_thumbnail(url='')
 
         items = db.retrieve_shop_submissions()
         for item in items:

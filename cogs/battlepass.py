@@ -100,19 +100,21 @@ class BattlepassCog(commands.Cog):
             # Check if it has been at least 15 minutes
             if time_since_redemption.total_seconds() >= 900: # 15 minutes
                 points = db.retrieve_points(user_id=user_id)
+                level = db.retrieve_level(user_id=user_id)
+                points_gained = utils.points(level=level)
 
-                db.update_points(user_id=user_id, points=(utils.points() + points))
+                db.update_points(user_id=user_id, points=(points_gained + points))
                 db.update_redemption_time(user_id=user_id, current_time=current_time)
 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
                 embed.set_author(name=f'Requested by {user_name}', icon_url=ctx.author.avatar)
                 embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
-                embed.add_field(name=f'You\'ve been awarded {utils.points()} points!', value=f'Updated points: {points + utils.points()}', inline=False)
+                embed.add_field(name=f'You\'ve been awarded {points_gained} points!', value=f'Updated points: {points + points_gained}', inline=False)
                 embed.add_field(name='', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
                 await ctx.send(embed=embed)
 
                 logging.info('Successfully awarded %d points to [%s:%s] in server [%s:%s].',
-                             utils.points(),
+                             points_gained,
                              user_name, utils.decimal_to_hex(user_id),
                              guild_name, utils.decimal_to_hex(guild_id)
                             )

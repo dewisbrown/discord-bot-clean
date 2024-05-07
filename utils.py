@@ -5,11 +5,13 @@ Keeping inside cog directory for easier import.
 import datetime
 
 
-def points() -> int:
+def points(level: int) -> int:
     """
     Points awarded to user for battlepass. Double points
     if redeemed between 18:00 and 22:00 CST.
     """
+    BASE_POINTS = 15
+    level_points = (level // 10) * 5
     now = datetime.datetime.now()
     start = datetime.datetime(now.year, now.month, now.day, 18, 0, 0)
     end = datetime.datetime(now.year, now.month, now.day, 22, 0, 0)
@@ -17,9 +19,9 @@ def points() -> int:
     double_xp = start <= now <= end
 
     if double_xp:
-        return 30
+        return (BASE_POINTS * 2) + level_points
     else:
-        return 15
+        return BASE_POINTS + level_points
 
 
 def decimal_to_hex(decimal: int) -> str:

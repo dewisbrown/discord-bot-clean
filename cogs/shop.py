@@ -129,19 +129,11 @@ class ShopCog(commands.Cog):
             await ctx.send('Use `$help submit_item` for more information.')
         else:
             item_name = split_args[0].strip()
-            try:
-                value = int(split_args[1].strip())
-            except ValueError:
-                await ctx.send('Submit a positive, whole number for value.')
-                return
-            rarity = split_args[2].strip()
+            rarity = split_args[1].strip()
 
             # Verify all args are valid
             if len(item_name) == 0:
                 await ctx.send('Item name was blank.')
-                return
-            if value < 1:
-                await ctx.send('Submit a positive, whole number for value.')
                 return
 
             rarities = [
@@ -170,7 +162,7 @@ class ShopCog(commands.Cog):
                 description='You have successfully submitted an item.',
                 timestamp=datetime.datetime.now()
                 )
-            embed.add_field(name=item_name, value=f'Rarity: {rarity}\nValue: {value}', inline=False)
+            embed.add_field(name=item_name, value=f'Rarity: {rarity}', inline=False)
             await ctx.send(embed=embed)
 
 

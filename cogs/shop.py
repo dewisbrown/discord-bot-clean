@@ -125,7 +125,7 @@ class ShopCog(commands.Cog):
         guild_name = ctx.author.guild.name
 
         split_args: list[str] = args.split(',')
-        if len(split_args) != 3:
+        if len(split_args) != 2:
             await ctx.send('Use `$help submit_item` for more information.')
         else:
             item_name = split_args[0].strip()

@@ -109,8 +109,6 @@ class ShopCog(commands.Cog):
             await ctx.send(f'{item_name} is not in the shop. Use `$shop` to see items in the shop.')
             return
 
-        
-
 
     @commands.command()
     async def submit_item(self, ctx, *, args):
@@ -169,7 +167,7 @@ class ShopCog(commands.Cog):
     @commands.command()
     async def submissions(self, ctx):
         """
-        Command to vote for shop item submissions.
+        Command to view item submissions.
         """
         logging.info('Submissions command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id

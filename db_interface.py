@@ -138,6 +138,7 @@ def update_level(user_id: int, level: int):
 def retrieve_inventory(user_id: int):
     """
     Retrieves user inventory.
+    Format of each returned record: (item_name, value, rarity).
     """
     # Connect to the database
     conn = sqlite3.connect(DB_FILE)
@@ -177,6 +178,7 @@ def update_inventory(user_id: int,
 def retrieve_top_five():
     """
     Retrieve list of five highest point users.
+    Format of each record returned: (user_name, level, points).
     """
     # Connect to the database
     conn = sqlite3.connect(DB_FILE)
@@ -190,7 +192,8 @@ def retrieve_top_five():
 
 def retrieve_shop_items() -> list:
     """
-    Retrieves ten items at random from shop table.
+    Retrieves ten items at random from shop table. Format 
+    of each record returned: (item_name, rarity, img_url).
     """
     # Can be rarity counts can be changed at any time
     rarity_counts = {
@@ -289,7 +292,8 @@ def retrieve_shop_submission(item_name: str):
 
 def retrieve_shop_submissions():
     """
-    Retreives all shop submissions.
+    Retreives all shop submissions. Format of each returned record:
+    (item_id, user_id, user_name, submit_time, item_name, rarity).
     """
     # Connect to the database
     conn = sqlite3.connect(DB_FILE)
@@ -315,18 +319,3 @@ def create_command_request(user_id: int, guild_id: int, command: str, cog: str) 
     cursor.execute(query, (user_id, guild_id, command, cog))
     conn.commit()
     conn.close()
-
-
-def create_vote(user_id: int, vote_time: str, item_id: int) -> None:
-    """
-    Creates vote record in vote table.
-    """
-    # Connect to sqlite database (make new if doesn't exist)
-    conn = sqlite3.connect(DB_FILE)
-
-    # Create a cursor object to execute SQL commands
-    cursor = conn.cursor()
-
-    # Check if submitted vote item exists
-    query = 'SELECT item_name FROM shop_submissions WHERE item_id = ?'
-    cursor.execute(query, (item_id))

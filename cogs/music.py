@@ -88,7 +88,7 @@ class MusicCog(commands.Cog):
         cowboy_emoji = '\U0001F920'
 
         # Check if queue for guild is empty
-        if self.queues[ctx.guild.id] != []:
+        if len(self.queues[ctx.guild.id]) > 0:
             url = self.queues[ctx.guild.id].pop(0)
             await self.play(ctx, url=url)
         # If empty queue, stop player

@@ -56,8 +56,13 @@ class MusicCog(commands.Cog):
 
         note_emoji = '\U0001F3B5'
         try:
-            voice_client = await ctx.author.voice.channel.connect()
-            self.voice_clients[voice_client.guild.id] = voice_client
+            voice_client: discord.VoiceClient = await ctx.author.voice.channel.connect()
+            # Add url to queue if voice_client is already playing
+            # TODO: implement logic for calling play() when audio already playing
+            if self.voice_clients[voice_client.guild.id]:
+                pass
+            else:
+                self.voice_clients[voice_client.guild.id] = voice_client
         except Exception as e:
             logging.error(msg=e)
 
@@ -86,6 +91,9 @@ class MusicCog(commands.Cog):
         if self.queues[ctx.guild.id] != []:
             url = self.queues[ctx.guild.id].pop(0)
             await self.play(ctx, url=url)
+        # If empty queue, stop player
+        else:
+            await self.stop(ctx)
 
     @commands.command()
     async def shuffle(self, ctx):
@@ -114,7 +122,7 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def pause(self, ctx):
         """
-
+        Stops audio playback in voice channel. Can be resumed.
         """
         logging.info('Pause command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
         try:
@@ -124,7 +132,9 @@ class MusicCog(commands.Cog):
 
     @commands.command()
     async def resume(self, ctx):
-        '''Resumes audio playback in voice channel.'''
+        """
+        Resumes audio playback in voice channel.
+        """
         logging.info('Resume command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
         try:
             self.voice_clients[ctx.guild.id].resume()

@@ -56,12 +56,17 @@ class MusicCog(commands.Cog):
 
         note_emoji = '\U0001F3B5'
         try:
-            voice_client: discord.voice_client.VoiceClient = await ctx.author.voice.channel.connect()
-            # Add url to queue if voice_client is already playing
-            # TODO: implement logic for calling play() when audio already playing
+            # Check if voice client has been created for guild
+            if ctx.guild.id in self.voice_clients:
+                # Check if there is a queue for the guild
+                if ctx.guild.id not in self.queues:
+                    self.queues[ctx.guild.id] = []
+                self.queues[ctx.guild.id].append(url)
+                return
+            voice_client = await ctx.author.voice.channel.connect()
             self.voice_clients[voice_client.guild.id] = voice_client
         except Exception as e:
-            logging.error(msg=e)
+            logging.error(e)
 
         try:
             loop = asyncio.get_event_loop()
@@ -74,7 +79,6 @@ class MusicCog(commands.Cog):
         except Exception as e:
             logging.error(msg=e)
 
-    # TODO: figure out if calling dict with key that doesn't exist causes error
     @commands.command()
     async def skip(self, ctx):
         """
@@ -85,12 +89,16 @@ class MusicCog(commands.Cog):
         cowboy_emoji = '\U0001F920'
 
         # Check if queue for guild is empty
-        if len(self.queues[ctx.guild.id]) > 0:
-            url = self.queues[ctx.guild.id].pop(0)
-            await self.play(ctx, url=url)
-        # If empty queue, stop player
-        else:
+        if ctx.guild.id not in self.queues:
             await self.stop(ctx)
+        else:
+            if len(self.queues[ctx.guild.id]) > 0:
+                url = self.queues[ctx.guild.id].pop(0)
+                self.voice_clients[ctx.guild.id].stop()
+                await self.play(ctx, url=url)
+            else:
+                del self.queues[ctx.guild.id]
+                await self.stop(ctx)
 
     @commands.command()
     async def shuffle(self, ctx):

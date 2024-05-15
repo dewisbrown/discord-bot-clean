@@ -56,13 +56,10 @@ class MusicCog(commands.Cog):
 
         note_emoji = '\U0001F3B5'
         try:
-            voice_client: discord.VoiceClient = await ctx.author.voice.channel.connect()
+            voice_client: discord.voice_client.VoiceClient = await ctx.author.voice.channel.connect()
             # Add url to queue if voice_client is already playing
             # TODO: implement logic for calling play() when audio already playing
-            if self.voice_clients[voice_client.guild.id]:
-                pass
-            else:
-                self.voice_clients[voice_client.guild.id] = voice_client
+            self.voice_clients[voice_client.guild.id] = voice_client
         except Exception as e:
             logging.error(msg=e)
 
@@ -77,13 +74,13 @@ class MusicCog(commands.Cog):
         except Exception as e:
             logging.error(msg=e)
 
+    # TODO: figure out if calling dict with key that doesn't exist causes error
     @commands.command()
     async def skip(self, ctx):
         """
         Stops current song playing and plays next song in queue.
         """
         logging.info('Skip command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
-
         note_emoji = '\U0001F3B5'
         cowboy_emoji = '\U0001F920'
 

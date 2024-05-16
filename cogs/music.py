@@ -31,16 +31,19 @@ class MusicCog(commands.Cog):
         logging.info('Queue command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
         if len(self.queues[ctx.guild.id]) == 0:
             await ctx.send('The queue is empty.')
-        # else:
-        #     note_emoji = '\U0001F3B5'
-        #     embed = discord.Embed(title=f'{note_emoji}  **Current Queue | {len(self.queues[ctx.guild.id])} entries**', timestamp=datetime.datetime.now())
-        #     message = ''
-        #
-        #     for index, item in enumerate(queue):
-        #         message += f'`{index + 1}` | (`{item["song_duration"]}`) **{item["song_name"]} -** {item["request_author"]}\n'
-        #
-        #     embed.add_field(name='', value=message, inline=False)
-        #     await ctx.send(embed=embed)
+        else:
+            note_emoji = '\U0001F3B5'
+            embed = discord.Embed(title=f'{note_emoji}  **Current Queue | {len(self.queues[ctx.guild.id])} entries**', timestamp=datetime.datetime.now())
+            message = ''
+
+            for index, url in enumerate(self.queues[ctx.guild.id]):
+                loop = asyncio.get_event_loop()
+                data = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(self.queues[ctx.guild.id].pop(0),
+                                                                                       download=False))
+                message += f'`{index + 1}` | (`{data["duration"]}`) **{data["title"]} -** "request_author"\n'
+
+            embed.add_field(name='', value=message, inline=False)
+            await ctx.send(embed=embed)
 
     @commands.command()
     async def play(self, ctx, *, url):

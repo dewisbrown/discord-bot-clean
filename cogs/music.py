@@ -140,7 +140,7 @@ class MusicCog(commands.Cog):
         try:
             self.voice_clients[ctx.guild.id].pause()
         except Exception as e:
-            logging.error(msg=e)
+            logging.error('Failed to pause: %s', str(e))
 
     @commands.command()
     async def resume(self, ctx):
@@ -151,7 +151,7 @@ class MusicCog(commands.Cog):
         try:
             self.voice_clients[ctx.guild.id].resume()
         except Exception as e:
-            logging.error(msg=e)
+            logging.error('Failed to resume playback: %s', str(e))
 
     @commands.command()
     async def stop(self, ctx):
@@ -163,7 +163,7 @@ class MusicCog(commands.Cog):
             await self.voice_clients[ctx.guild.id].disconnect()
             del self.voice_clients[ctx.guild.id]
         except Exception as e:
-            logging.error('Failed to stop: %s', str(e))
+            logging.error('Failed to stop playback: %s', str(e))
 
 
 async def setup(bot):

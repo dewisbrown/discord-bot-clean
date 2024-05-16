@@ -58,26 +58,29 @@ class MusicCog(commands.Cog):
         try:
             # Check if voice client has been created for guild
             if ctx.guild.id in self.voice_clients:
-                # Check if there is a queue for the guild
+                # Add to queue
                 if ctx.guild.id not in self.queues:
                     self.queues[ctx.guild.id] = []
                 self.queues[ctx.guild.id].append(url)
-                return
-            voice_client = await ctx.author.voice.channel.connect()
-            self.voice_clients[voice_client.guild.id] = voice_client
+            else:
+                voice_client = await ctx.author.voice.channel.connect()
+                self.voice_clients[voice_client.guild.id] = voice_client
+
+                if ctx.guild.id not in self.queues:
+                    self.queues[ctx.guild.id] = []
+                self.queues[ctx.guild.id].append(url)
+                while len(self.queues[ctx.guild.id]) > 0:
+                    loop = asyncio.get_event_loop()
+                    data = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(self.queues[ctx.guild.id].pop(0), download=False))
+
+                    song = data['url']
+                    player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
+                    self.voice_clients[ctx.guild.id].play(player)
+
+                    while self.voice_clients[ctx.guild.id].is_playing():
+                        await asyncio.sleep(1)
         except Exception as e:
-            logging.error(e)
-
-        try:
-            loop = asyncio.get_event_loop()
-            data = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(url, download=False))
-
-            song = data['url']
-            player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
-
-            self.voice_clients[ctx.guild.id].play(player, after=lambda e: asyncio.run_coroutine_threadsafe(self.skip(ctx), self.bot.loop))
-        except Exception as e:
-            logging.error(msg=e)
+            logging.error('Failed to play song: %s',str(e))
 
     @commands.command()
     async def skip(self, ctx):
@@ -88,17 +91,21 @@ class MusicCog(commands.Cog):
         note_emoji = '\U0001F3B5'
         cowboy_emoji = '\U0001F920'
 
-        # Check if queue for guild is empty
-        if ctx.guild.id not in self.queues:
-            await self.stop(ctx)
-        else:
+        if self.voice_clients[ctx.guild.id] and self.voice_clients[ctx.guild.id].is_playing():
+            self.voice_clients[ctx.guild.id].stop()
+            await ctx.reply(f'{cowboy_emoji} Skipped **skipped_song.name** - [`skipped_song.duration`]`')
+
             if len(self.queues[ctx.guild.id]) > 0:
-                url = self.queues[ctx.guild.id].pop(0)
-                self.voice_clients[ctx.guild.id].stop()
-                await self.play(ctx, url=url)
+                loop = asyncio.get_event_loop()
+                data = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(self.queues[ctx.guild.id].pop(0), download=False))
+                song = data['url']
+
+                player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
+                self.voice_clients[ctx.guild.id].play(player)
             else:
-                del self.queues[ctx.guild.id]
                 await self.stop(ctx)
+        else:
+            await ctx.send('There is no song currently playing.')
 
     @commands.command()
     async def shuffle(self, ctx):
@@ -156,7 +163,7 @@ class MusicCog(commands.Cog):
             await self.voice_clients[ctx.guild.id].disconnect()
             del self.voice_clients[ctx.guild.id]
         except Exception as e:
-            logging.error(msg=e)
+            logging.error('Failed to stop: %s', str(e))
 
 
 async def setup(bot):

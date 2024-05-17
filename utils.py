@@ -12,6 +12,8 @@ def points(level: int) -> int:
     """
     BASE_POINTS = 15
     level_points = (level // 10) * 5
+    total_points = BASE_POINTS + level_points
+
     now = datetime.datetime.now()
     start = datetime.datetime(now.year, now.month, now.day, 18, 0, 0)
     end = datetime.datetime(now.year, now.month, now.day, 22, 0, 0)
@@ -19,9 +21,8 @@ def points(level: int) -> int:
     double_xp = start <= now <= end
 
     if double_xp:
-        return (BASE_POINTS * 2) + level_points
-    else:
-        return BASE_POINTS + level_points
+        return total_points * 2
+    return total_points
 
 
 def decimal_to_hex(decimal: int) -> str:

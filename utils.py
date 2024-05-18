@@ -97,8 +97,8 @@ def command_info(command: str) -> dict | None:
         'example': '`$submit_item Winton Plush, Legendary`',
     }
     play = {
-        'description': 'Plays YouTube video audio in voice channel.',
-        'syntax': '`$play <youtube_url>`\n`$play <search_terms>`',
+        'description': 'Plays YouTube video audio in voice channel. Option to provide YouTube link, Spotify link, or search terms.',
+        'syntax': '`$play <youtube_url>`\n`$play <search_terms>`\n`$play <spotify_link>`',
         'example': '`$play https://www.youtube.com/watch?v=L_jWHffIx5E`\n`$play All Star Smash Mouth`',
     }
     queue = {
@@ -137,12 +137,12 @@ def command_info(command: str) -> dict | None:
         'example': '`$ufc`',
     }
     elijah = {
-        'description': 'Displays days since Elijah joined.',
+        'description': 'Displays welcome back message for Elijah.',
         'syntax': '`$elijah`',
         'example': '`$elijah`',
     }
     mark = {
-        'description': 'Displays days since Mark joined.',
+        'description': 'Displays days since Mark left.',
         'syntax': '`$mark`',
         'example': '`$mark`',
     }

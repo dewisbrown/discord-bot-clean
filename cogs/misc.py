@@ -1,4 +1,9 @@
-import os, sys, random, logging, requests, datetime
+import os
+import sys
+import random
+import logging
+import requests
+import datetime
 import discord
 from discord.ext import commands
 from bs4 import BeautifulSoup

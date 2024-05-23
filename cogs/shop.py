@@ -39,10 +39,12 @@ class ShopCog(commands.Cog):
     @commands.command()
     async def inventory(self, ctx, user_name=None):
         '''Lists the user's inventory.'''
+        logging.info('Inventory command submitted by [%s:%s]', ctx.author, ctx.author.id)
         if user_name:
             # Check if user is in same guild as ctx.author
             user_id = db.get_user_id(user_name=user_name, guild_id=ctx.author.guild.id)
             if user_id:
+                user_id = int(user_id[0])
                 items = db.retrieve_inventory(user_id=user_id)
                 if items:
                     embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
@@ -53,6 +55,8 @@ class ShopCog(commands.Cog):
                     await ctx.send(embed=embed)
                 else:
                     await ctx.send(f'{user_name} has an empty inventory.')
+            else:
+                await ctx.send(f'The user [{user_name}] is not in this guild or has not registered for the battlepass.')
         else:
             user_id = ctx.author.id
             items = db.retrieve_inventory(user_id=user_id)

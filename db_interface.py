@@ -37,7 +37,7 @@ def get_user_id(**kwargs):
     # Execute query with values from kwargs
     cursor.execute(query, tuple(values))
 
-    return cursor.fetchall()
+    return cursor.fetchone()
 
 
 def create_user(user_id: int, redemption_time, user_name: str, guild_id: int):

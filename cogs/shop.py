@@ -37,20 +37,39 @@ class ShopCog(commands.Cog):
 
 
     @commands.command()
-    async def inventory(self, ctx):
+    async def inventory(self, ctx, user_name=None):
         '''Lists the user's inventory.'''
-        user_id = ctx.author.id
-        items = db.retrieve_inventory(user_id=user_id)
-
-        if items:
-            embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
-            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
-            embed.set_thumbnail(url='https://www.kindpng.com/picc/m/172-1721685_image-png-international-file-dora-the-explorer-backpack.png')
-            for item in items:
-                embed.add_field(name=item[0], value=f'Value: {item[1]} - Rarity: {item[2]}', inline=False)
-            await ctx.send(embed=embed)
+        logging.info('Inventory command submitted by [%s:%s]', ctx.author, ctx.author.id)
+        if user_name:
+            # Check if user is in same guild as ctx.author
+            user_id = db.get_user_id(user_name=user_name, guild_id=ctx.author.guild.id)
+            if user_id:
+                user_id = int(user_id[0])
+                items = db.retrieve_inventory(user_id=user_id)
+                if items:
+                    embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
+                    embed.set_author(name=user_name)
+                    embed.set_thumbnail(url='https://www.kindpng.com/picc/m/172-1721685_image-png-international-file-dora-the-explorer-backpack.png')
+                    for item in items:
+                        embed.add_field(name=item[0], value=f'Value: {item[1]} - Rarity: {item[2]}', inline=False)
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send(f'{user_name} has an empty inventory.')
+            else:
+                await ctx.send(f'The user [{user_name}] is not in this guild or has not registered for the battlepass.')
         else:
-            await ctx.send('Your inventory is empty.')
+            user_id = ctx.author.id
+            items = db.retrieve_inventory(user_id=user_id)
+
+            if items:
+                embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
+                embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
+                embed.set_thumbnail(url='https://www.kindpng.com/picc/m/172-1721685_image-png-international-file-dora-the-explorer-backpack.png')
+                for item in items:
+                    embed.add_field(name=item[0], value=f'Value: {item[1]} - Rarity: {item[2]}', inline=False)
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send('Your inventory is empty.')
 
 
     @commands.command()

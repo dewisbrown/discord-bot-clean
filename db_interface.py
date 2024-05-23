@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'data/battlepass.db') # change to test.db for testing
 
 
-def get_user_id(user_id):
+def get_user_id(**kwargs):
     """
     Retrieves user id from battlepass table.
     Used to check if user is enrolled already.
@@ -20,9 +20,24 @@ def get_user_id(user_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
-    # Check if the user is already registered
-    cursor.execute('SELECT user_id FROM battlepass WHERE user_id = ?', (user_id,))
-    return cursor.fetchone()
+    conditions = []
+    values = []
+
+    # build WHERE clause based on kwargs
+    for key, value in kwargs.items():
+        conditions.append(f'{key} = ?')
+        values.append(value)
+    where_clause = ' AND '.join(conditions)
+
+    # build query with where clause (if kwargs were supplied)
+    query = 'SELECT user_id FROM battlepass'
+    if conditions:
+        query += f' WHERE {where_clause}'
+
+    # Execute query with values from kwargs
+    cursor.execute(query, tuple(values))
+
+    return cursor.fetchall()
 
 
 def create_user(user_id: int, redemption_time, user_name: str, guild_id: int):

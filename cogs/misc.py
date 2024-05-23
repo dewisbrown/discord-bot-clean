@@ -1,4 +1,9 @@
-import os, sys, random, logging, requests, datetime
+import os
+import sys
+import random
+import logging
+import requests
+import datetime
 import discord
 from discord.ext import commands
 from bs4 import BeautifulSoup
@@ -229,6 +234,8 @@ class MiscCog(commands.Cog):
 
         # Input changes made, adjust when new features added
         changes = [
+            ['Music commands', 'Changed how bot plays audio. Uses stream instead of downloading mp3.'],
+            ['`$elijah`', 'New embed for this command. Contains image and new text.'],
             ['`$submit_item`', 'Submit items to the shop by providing a name and rarity.'],
             ['Dynamic shop prices', 'Shop prices are calculated every shop refresh. Small chance for low prices.'],
             ['Points increase with level', 'Tiering up allows you to receive more points through the `$points` command.']

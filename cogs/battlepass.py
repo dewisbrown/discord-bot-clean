@@ -183,28 +183,45 @@ class BattlepassCog(commands.Cog):
 
 
     @commands.command()
-    async def battlepass(self, ctx):
+    async def battlepass(self, ctx, user=None):
         """
         Returns the users current level and points.
         """
         logging.info('Battlepass command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
-        user_name = ctx.author.name
         guild_name = ctx.author.guild.name
 
-        # Get user points and level
-        points = db.retrieve_points(user_id=user_id)
-        level = db.retrieve_level(user_id=user_id)
+        if user:
+            # Check if user is in same guild as ctx.author
+            user_id = db.get_user_id(user_name=user, guild_id=ctx.author.guild.id)
+            if user_id:
+                user_id = int(user_id[0])
+                points = db.retrieve_points(user_id=user_id)
+                level = db.retrieve_level(user_id=user_id)
+                if points:
+                    embed = discord.Embed(title=f'[{guild_name}] Battlepass Progress', timestamp=datetime.datetime.now())
+                    embed.set_author(name=user)
+                    embed.add_field(name=f'Level: {level}', value=f'Points: {points}', inline=False)
 
-        if points:
-            embed = discord.Embed(title=f'[{guild_name}] Battlepass Progress', timestamp=datetime.datetime.now())
-            embed.set_author(name=user_name)
-            embed.set_thumbnail(url=ctx.author.avatar)
-            embed.add_field(name=f'Level: {level}', value=f'Points: {points}', inline=False)
-
-            await ctx.send(embed=embed)
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send(f'{user} is not registered in the battlepass yet.')
+            else:
+                await ctx.send(f'`{user}` is either not in this guild or has not registered for the battlepass.')
         else:
-            await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
+            # Get user points and level
+            points = db.retrieve_points(user_id=user_id)
+            level = db.retrieve_level(user_id=user_id)
+
+            if points:
+                embed = discord.Embed(title=f'[{guild_name}] Battlepass Progress', timestamp=datetime.datetime.now())
+                embed.set_author(name=ctx.author.name)
+                embed.set_thumbnail(url=ctx.author.avatar)
+                embed.add_field(name=f'Level: {level}', value=f'Points: {points}', inline=False)
+
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send('You\'re not registered in the battlepass yet. Use the `$register` command to get started.')
 
 
     @commands.command()

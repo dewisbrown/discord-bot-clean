@@ -30,7 +30,7 @@ class ShopCog(commands.Cog):
 
         for k, v in shop.items():
             item_name = k
-            rarity, img_url, value = v
+            rarity, value = v
             embed.add_field(name=item_name, value=f'Points: {value} - Rarity: {rarity}', inline=False)
 
         await ctx.send(embed=embed)
@@ -212,9 +212,9 @@ async def refresh_shop():
 
     shop_items = db.retrieve_shop_items()
     for item in shop_items:
-        item_name, rarity, img_url = item
+        item_name, rarity = item
         value = calculate_value(rarity)
-        shop[item_name] = [rarity, img_url, value]
+        shop[item_name] = [rarity, value]
 
     current_time = datetime.datetime.now(pytz.timezone('US/Central'))
     set_shop_refresh_time(current_time + datetime.timedelta(minutes=30))

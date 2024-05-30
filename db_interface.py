@@ -229,7 +229,7 @@ def retrieve_shop_items() -> list:
     selected_items = []
 
     for rarity, count in rarity_counts.items():
-        query = 'SELECT * FROM shop WHERE rarity = ? ORDER BY RANDOM() LIMIT ?'
+        query = 'SELECT item_name, rarity FROM shop WHERE rarity = ? ORDER BY RANDOM() LIMIT ?'
         cursor.execute(query, (rarity, count))
         selected_items.extend(cursor.fetchall())
 

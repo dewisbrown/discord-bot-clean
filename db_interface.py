@@ -172,7 +172,6 @@ def update_inventory(user_id: int,
                      item_name: str,
                      value: int,
                      rarity: str,
-                     img_url: str,
                      purchase_date):
     """
     Creates inventory record.
@@ -183,9 +182,9 @@ def update_inventory(user_id: int,
 
     # Extract data from item_info and add to inventory
     cursor.execute('''INSERT INTO inventory
-                   (user_id, item_name, value, rarity, img_url, purchase_date) 
+                   (user_id, guild_id, item_name, value, rarity, purchase_date) 
                    VALUES (?, ?, ?, ?, ?, ?)''',
-                   (user_id, guild_id, item_name, value, rarity, img_url, purchase_date))
+                   (user_id, guild_id, item_name, value, rarity, purchase_date))
     conn.commit()
     conn.close()
 
@@ -229,7 +228,7 @@ def retrieve_shop_items() -> list:
     selected_items = []
 
     for rarity, count in rarity_counts.items():
-        query = 'SELECT item_name, rarity FROM shop WHERE rarity = ? ORDER BY RANDOM() LIMIT ?'
+        query = 'SELECT * FROM shop WHERE rarity = ? ORDER BY RANDOM() LIMIT ?'
         cursor.execute(query, (rarity, count))
         selected_items.extend(cursor.fetchall())
 

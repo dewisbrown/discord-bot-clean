@@ -97,7 +97,8 @@ class ShopCog(commands.Cog):
 
             # Check if user has enough points to purchase item
             points = int(db.retrieve_points(user_id=user_id))
-            rarity, img_url, value = item
+            rarity = item[0]
+            value = item[1]
 
             embed = discord.Embed(title='Item Purchase', timestamp=datetime.datetime.now())
             embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
@@ -113,7 +114,6 @@ class ShopCog(commands.Cog):
                     item_name=item_name,
                     value=value,
                     rarity=rarity,
-                    img_url=img_url,
                     purchase_date=datetime.datetime.now()
                     )
 
@@ -212,7 +212,8 @@ async def refresh_shop():
 
     shop_items = db.retrieve_shop_items()
     for item in shop_items:
-        item_name, rarity = item
+        item_name = item[0]
+        rarity = item[1]
         value = calculate_value(rarity)
         shop[item_name] = [rarity, value]
 

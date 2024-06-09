@@ -2,19 +2,21 @@ import sqlite3
 import os
 
 
-DB_FILE = os.path.join('..', 'data', 'battlepass.db')
+rel_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'battlepass.db')
+DB_FILE = os.path.abspath(rel_path)
 
-def add_column_to_table(table_name: str, col_name: str) -> None:
+def add_column_to_table(table_name: str, col_name: str, col_type: str) -> None:
     """
     Add a column to an existing table.
     """
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
-    query = ''
-    cursor.execute(query, (table_name, col_name))
+    query = f'ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type}'
+    cursor.execute(query)
 
     conn.commit()
+    cursor.close()
     conn.close()
 
 def remove_column_from_table(table_name: str, col_name: str) -> None:
@@ -24,8 +26,9 @@ def remove_column_from_table(table_name: str, col_name: str) -> None:
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
-    query = ''
-    cursor.execute(query, (table_name, col_name))
+    # TODO: implement logic for removing column
+    query = f''
+    cursor.execute(query)
 
     conn.commit()
     conn.close()

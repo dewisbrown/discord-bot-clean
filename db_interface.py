@@ -89,6 +89,23 @@ def retrieve_redemption_time(user_id: int):
     else:
         return None
 
+def retrieve_daily_redemption_time(user_id: int):
+    """
+    Retrieves timestamp of last daily point redemption for a user.
+    """
+    # Connect to the database
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    # Check the last awarded timestamp for the user
+    cursor.execute('SELECT daily_redemption FROM battlepass WHERE user_id = ?', (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if result:
+        return result[0]
+    else:
+        return None
 
 def update_redemption_time(user_id: int, current_time):
     """

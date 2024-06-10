@@ -2,14 +2,12 @@
 Using to minimize re-written code in cog files. 
 Provides a way to input and retreive data from database.
 """
-
 import sqlite3
 import os
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'data/battlepass.db') # change to test.db for testing
-
 
 def get_user_id(**kwargs):
     """
@@ -39,7 +37,6 @@ def get_user_id(**kwargs):
 
     return cursor.fetchone()
 
-
 def create_user(user_id: int, redemption_time, user_name: str, guild_id: int):
     """
     Enters user into battlepass table.
@@ -53,7 +50,6 @@ def create_user(user_id: int, redemption_time, user_name: str, guild_id: int):
                    level, user_name) VALUES (?, ?, ?, ?, ?, ?)''',
                    (user_id, guild_id, 20, redemption_time, 1, user_name))
     conn.commit()
-
 
 def retrieve_points(user_id: int):
     """
@@ -69,7 +65,6 @@ def retrieve_points(user_id: int):
     conn.close()
 
     return result[0]
-
 
 def retrieve_redemption_time(user_id: int):
     """
@@ -148,7 +143,6 @@ def update_points(user_id: int, points: int) -> None:
     conn.commit()
     conn.close()
 
-
 def retrieve_level(user_id: int):
     """
     Retrieves user level.
@@ -166,7 +160,6 @@ def retrieve_level(user_id: int):
     else:
         return None
 
-
 def update_level(user_id: int, level: int):
     """
     Update user level.
@@ -178,7 +171,6 @@ def update_level(user_id: int, level: int):
     cursor.execute('UPDATE battlepass SET level = ? WHERE user_id = ?', (level, user_id,))
     conn.commit()
     conn.close()
-
 
 def retrieve_inventory(user_id: int):
     """
@@ -195,7 +187,6 @@ def retrieve_inventory(user_id: int):
                         WHERE user_id = ?''', (user_id,))
     # for item in items -> item_name = item[0], value = item[1], rarity = item[2]
     return cursor.fetchall()
-
 
 def update_inventory(user_id: int,
                      guild_id: int,
@@ -218,8 +209,7 @@ def update_inventory(user_id: int,
     conn.commit()
     conn.close()
 
-
-def retrieve_top_five():
+def retrieve_top_five(guild_id):
     """
     Retrieve list of five highest point users.
     Format of each record returned: (user_name, level, points).
@@ -228,11 +218,11 @@ def retrieve_top_five():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
-    # Checks top 5 users
-    cursor.execute('''SELECT user_name, level, points FROM battlepass
-                   ORDER BY level DESC, points DESC LIMIT 5''')
+    # Checks top 5 users in given guild
+    query = '''SELECT user_name, level, points FROM battlepass WHERE guild_id = ?
+                   ORDER BY level DESC, points DESC LIMIT 5'''
+    cursor.execute(query, (guild_id))
     return cursor.fetchall()
-
 
 def retrieve_shop_items() -> list:
     """
@@ -265,7 +255,6 @@ def retrieve_shop_items() -> list:
     conn.close()
     return selected_items
 
-
 def retrieve_owned_item(user_id: int, item_name: str):
     """
     Retrieves item from user inventory. Returns None if user does not have item.
@@ -280,7 +269,6 @@ def retrieve_owned_item(user_id: int, item_name: str):
     cursor.execute(query, (user_id, item_name))
 
     return cursor.fetchone()
-
 
 def create_shop_item(item_name: str, rarity: str, img_url: str):
     """
@@ -297,7 +285,6 @@ def create_shop_item(item_name: str, rarity: str, img_url: str):
     cursor.execute(query, (item_name, rarity, img_url))
     conn.commit()
     conn.close()
-
 
 def create_shop_submission(
         user_id: int,
@@ -320,7 +307,6 @@ def create_shop_submission(
     conn.commit()
     conn.close()
 
-
 def retrieve_shop_submission(item_name: str):
     """
     Retrieves shop submission by name.
@@ -333,7 +319,6 @@ def retrieve_shop_submission(item_name: str):
     cursor.execute(query, (item_name))
     return cursor.fetchone()
 
-
 def retrieve_shop_submissions():
     """
     Retreives all shop submissions. Format of each returned record:
@@ -344,7 +329,6 @@ def retrieve_shop_submissions():
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM shop_submissions')
     return cursor.fetchall()
-
 
 # Currently not in use, not sure if needed or wanted.
 def create_command_request(user_id: int, guild_id: int, command: str, cog: str) -> None:

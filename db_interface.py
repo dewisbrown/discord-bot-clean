@@ -121,6 +121,19 @@ def update_redemption_time(user_id: int, current_time):
     conn.commit()
     conn.close()
 
+def update_daily_redemption_time(user_id: int, current_time):
+    """
+    Updates timestamp for most recent daily point redemption for a user.
+    """
+    # Connect to the database
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    # Check the last awarded timestamp for the user
+    cursor.execute('''UPDATE battlepass SET daily_redemption = ?
+                   WHERE user_id = ?''', (current_time, user_id))
+    conn.commit()
+    conn.close()
 
 def update_points(user_id: int, points: int) -> None:
     """

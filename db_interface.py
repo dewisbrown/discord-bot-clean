@@ -209,7 +209,7 @@ def update_inventory(user_id: int,
     conn.commit()
     conn.close()
 
-def retrieve_top_five(guild_id):
+def retrieve_top_five(guild_id: int):
     """
     Retrieve list of five highest point users.
     Format of each record returned: (user_name, level, points).
@@ -219,9 +219,8 @@ def retrieve_top_five(guild_id):
     cursor = conn.cursor()
 
     # Checks top 5 users in given guild
-    query = '''SELECT user_name, level, points FROM battlepass WHERE guild_id = ?
-                   ORDER BY level DESC, points DESC LIMIT 5'''
-    cursor.execute(query, (guild_id))
+    query = 'SELECT user_name, level, points FROM battlepass WHERE guild_id = ? ORDER BY level DESC, points DESC LIMIT 5'
+    cursor.execute(query, (guild_id,))
     return cursor.fetchall()
 
 def retrieve_shop_items() -> list:

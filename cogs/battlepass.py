@@ -230,10 +230,12 @@ class BattlepassCog(commands.Cog):
         Returns the top 5 battlepass members.
         """
         logging.info('Top5 command submitted by [%s]', ctx.author.name)
+        guild_id = int(ctx.author.guild.id)
+
         embed = discord.Embed(title='Top 5 Battlepass Members', description='Sorted by level and points.', timestamp=datetime.datetime.now())
         embed.set_thumbnail(url='https://ih1.redbubble.net/image.660900869.4748/pp,504x498-pad,600x600,f8f8f8.u8.jpg')
 
-        results = db.retrieve_top_five()
+        results = db.retrieve_top_five(guild_id=guild_id)
         for result in results:
             user_name, level, points = result
             embed.add_field(name=user_name, value=f'Level: {level} Points: {points}', inline=False)

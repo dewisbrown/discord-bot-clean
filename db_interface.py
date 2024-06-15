@@ -37,7 +37,7 @@ def get_user_id(**kwargs):
 
     return cursor.fetchone()
 
-def create_user(user_id: int, redemption_time, user_name: str, guild_id: int):
+def create_user(user_id: int, redemption_time, user_name: str, guild_id: int, daily_redemption):
     """
     Enters user into battlepass table.
     """
@@ -47,8 +47,8 @@ def create_user(user_id: int, redemption_time, user_name: str, guild_id: int):
 
     cursor.execute('''INSERT INTO battlepass (
                    user_id, guild_id, points, redemption_time, 
-                   level, user_name) VALUES (?, ?, ?, ?, ?, ?)''',
-                   (user_id, guild_id, 20, redemption_time, 1, user_name))
+                   level, user_name, daily_redemption) VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                   (user_id, guild_id, 120, redemption_time, 1, user_name, daily_redemption))
     conn.commit()
 
 def retrieve_points(user_id: int):

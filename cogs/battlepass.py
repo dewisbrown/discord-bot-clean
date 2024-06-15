@@ -138,6 +138,31 @@ class BattlepassCog(commands.Cog):
                          guild_name, utils.decimal_to_hex(guild_id)
                          )
 
+    @commands.command()
+    async def daily(self, ctx):
+        """
+        Allows user to receive points every 24 hours.
+        """
+        logging.info('Daily command submitted by [%s]', ctx.author.name)
+        user_id = ctx.author.id
+        user_name = ctx.author.name
+        guild_id = ctx.author.guild.id
+        guild_name = ctx.author.guild.name
+
+        daily_redemption_str = db.retrieve_daily_redemption_time(user_id=user_id)
+
+        if daily_redemption_str:
+            last_redeemed = datetime.datetime.strptime(daily_redemption_str, '%Y-%m-%d %H:%M:%S.%f')
+            current_time = datetime.datetime.now()
+            time_since_redemption = current_time - last_redeemed
+            next_redemption_time = (last_redeemed + datetime.timedelta(hours=24)).strftime('%Y-%m-%d %I:%M %p')
+
+            # Check if it has been at least 24 hours
+            if time_since_redemption.total_seconds >= 86400: # 24 hours = 86400 seconds
+                points = db.retrieve_points(user_id=user_id)
+                level = db.retrieve_level(user_id=user_id)
+        else:
+            pass
 
     @commands.command()
     async def tierup(self, ctx):

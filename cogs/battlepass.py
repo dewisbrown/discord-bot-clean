@@ -52,6 +52,7 @@ class BattlepassCog(commands.Cog):
         guild_name = ctx.author.guild.name
 
         registration_timestamp = datetime.datetime.now()
+        daily_timestamp = datetime.datetime.now()
 
         user_exists = db.get_user_id(user_id=user_id)
 
@@ -62,13 +63,14 @@ class BattlepassCog(commands.Cog):
                 user_id=user_id,
                 guild_id=guild_id,
                 redemption_time=registration_timestamp,
-                user_name=user_name
+                user_name=user_name,
+                daily_redemption=daily_timestamp
                 )
 
             embed = discord.Embed(title='Battlepass Registration', timestamp=registration_timestamp)
             embed.set_author(name=user_name, icon_url=ctx.author.avatar)
             embed.set_thumbnail(url='http://media.comicbook.com/2018/05/battle-pass-icon-1111187.jpeg')
-            embed.add_field(name='', value='You have received 20 points for registering.', inline=False)
+            embed.add_field(name='', value='You have received 120 points for registering.', inline=False)
             await ctx.send(embed=embed)
 
             logging.info(
@@ -138,31 +140,31 @@ class BattlepassCog(commands.Cog):
                          guild_name, utils.decimal_to_hex(guild_id)
                          )
 
-    @commands.command()
-    async def daily(self, ctx):
-        """
-        Allows user to receive points every 24 hours.
-        """
-        logging.info('Daily command submitted by [%s]', ctx.author.name)
-        user_id = ctx.author.id
-        user_name = ctx.author.name
-        guild_id = ctx.author.guild.id
-        guild_name = ctx.author.guild.name
+    # @commands.command()
+    # async def daily(self, ctx):
+    #     """
+    #     Allows user to receive points every 24 hours.
+    #     """
+    #     logging.info('Daily command submitted by [%s]', ctx.author.name)
+    #     user_id = ctx.author.id
+    #     user_name = ctx.author.name
+    #     guild_id = ctx.author.guild.id
+    #     guild_name = ctx.author.guild.name
 
-        daily_redemption_str = db.retrieve_daily_redemption_time(user_id=user_id)
+    #     daily_redemption_str = db.retrieve_daily_redemption_time(user_id=user_id)
 
-        if daily_redemption_str:
-            last_redeemed = datetime.datetime.strptime(daily_redemption_str, '%Y-%m-%d %H:%M:%S.%f')
-            current_time = datetime.datetime.now()
-            time_since_redemption = current_time - last_redeemed
-            next_redemption_time = (last_redeemed + datetime.timedelta(hours=24)).strftime('%Y-%m-%d %I:%M %p')
+    #     if daily_redemption_str:
+    #         last_redeemed = datetime.datetime.strptime(daily_redemption_str, '%Y-%m-%d %H:%M:%S.%f')
+    #         current_time = datetime.datetime.now()
+    #         time_since_redemption = current_time - last_redeemed
+    #         next_redemption_time = (last_redeemed + datetime.timedelta(hours=24)).strftime('%Y-%m-%d %I:%M %p')
 
-            # Check if it has been at least 24 hours
-            if time_since_redemption.total_seconds >= 86400: # 24 hours = 86400 seconds
-                points = db.retrieve_points(user_id=user_id)
-                level = db.retrieve_level(user_id=user_id)
-        else:
-            pass
+    #         # Check if it has been at least 24 hours
+    #         if time_since_redemption.total_seconds >= 86400: # 24 hours = 86400 seconds
+    #             points = db.retrieve_points(user_id=user_id)
+    #             level = db.retrieve_level(user_id=user_id)
+    #     else:
+    #         pass
 
     @commands.command()
     async def tierup(self, ctx):

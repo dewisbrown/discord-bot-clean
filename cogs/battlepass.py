@@ -140,31 +140,63 @@ class BattlepassCog(commands.Cog):
                          guild_name, utils.decimal_to_hex(guild_id)
                          )
 
-    # @commands.command()
-    # async def daily(self, ctx):
-    #     """
-    #     Allows user to receive points every 24 hours.
-    #     """
-    #     logging.info('Daily command submitted by [%s]', ctx.author.name)
-    #     user_id = ctx.author.id
-    #     user_name = ctx.author.name
-    #     guild_id = ctx.author.guild.id
-    #     guild_name = ctx.author.guild.name
+    @commands.command()
+    async def daily(self, ctx):
+        """
+        Allows user to receive points every 24 hours.
+        """
+        logging.info('Daily command submitted by [%s]', ctx.author.name)
+        user_id = ctx.author.id
+        user_name = ctx.author.name
+        guild_id = ctx.author.guild.id
+        guild_name = ctx.author.guild.name
 
-    #     daily_redemption_str = db.retrieve_daily_redemption_time(user_id=user_id)
+        daily_redemption_str = db.retrieve_daily_redemption_time(user_id=user_id)
 
-    #     if daily_redemption_str:
-    #         last_redeemed = datetime.datetime.strptime(daily_redemption_str, '%Y-%m-%d %H:%M:%S.%f')
-    #         current_time = datetime.datetime.now()
-    #         time_since_redemption = current_time - last_redeemed
-    #         next_redemption_time = (last_redeemed + datetime.timedelta(hours=24)).strftime('%Y-%m-%d %I:%M %p')
+        if daily_redemption_str:
+            last_redeemed = datetime.datetime.strptime(daily_redemption_str, '%Y-%m-%d %H:%M:%S.%f')
+            current_time = datetime.datetime.now()
+            time_since_redemption = current_time - last_redeemed
+            next_redemption_time = (last_redeemed + datetime.timedelta(hours=24)).strftime('%Y-%m-%d %I:%M %p')
 
-    #         # Check if it has been at least 24 hours
-    #         if time_since_redemption.total_seconds >= 86400: # 24 hours = 86400 seconds
-    #             points = db.retrieve_points(user_id=user_id)
-    #             level = db.retrieve_level(user_id=user_id)
-    #     else:
-    #         pass
+            # Check if it has been at least 24 hours
+            if time_since_redemption.total_seconds >= 86400: # 24 hours = 86400 seconds
+                points = db.retrieve_points(user_id=user_id)
+                points_gained = 100
+
+                db.update_points(user_id=user_id, points=(points_gained + points))
+                db.update_daily_redemption_time(user_id=user_id, current_time=current_time)
+
+                embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
+                embed.set_author(name=f'Requested by {user_name}', icon_url=ctx.author.avatar)
+                embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
+                embed.add_field(name=f'You\'ve been awarded {points_gained} points!', value=f'Updated points: {points + points_gained}', inline=False)
+                embed.add_field(name='', value=f'Your next redemption time is: {(current_time + datetime.timedelta(hours=24)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
+                await ctx.send(embed=embed)
+
+                logging.info('Successfully awarded %d points to [%s:%s] in server [%s:%s].',
+                             points_gained,
+                             user_name, utils.decimal_to_hex(user_id),
+                             guild_name, utils.decimal_to_hex(guild_id)
+                            )
+            else:
+                embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
+                embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+                embed.add_field(name='', value='Sorry, you can only claim daily points every 24 hours.', inline=False)
+                embed.add_field(name='', value=f'Your next redemption time is: {next_redemption_time}', inline=False)
+                await ctx.send(embed=embed)
+
+                logging.info(
+                    '[%s:%s] attempted to earn points before correct time in server [%s:%s].', 
+                    user_name, utils.decimal_to_hex(user_id), 
+                    guild_name, utils.decimal_to_hex(guild_id)
+                    )
+        else:
+            await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
+            logging.info('[%s:%s] attempted to earn points without being registered to battlepass in server [%s:%s].',
+                         user_name, utils.decimal_to_hex(user_id),
+                         guild_name, utils.decimal_to_hex(guild_id)
+                         )
 
     @commands.command()
     async def tierup(self, ctx):

@@ -57,6 +57,7 @@ class MiscCog(commands.Cog):
         else:
             battlepass_commands = f'''`$battlepass` - {utils.command_info('battlepass')['description']}\n
                         `$points` - {utils.command_info('points')['description']}\n
+                        `$daily` - {utils.command_info('daily'['description'])}\n
                         `$register` - {utils.command_info('register')['description']}\n
                         `$tierup` - {utils.command_info('tierup')['description']}\n
                         `$top5` - {utils.command_info('top5')['description']}'''

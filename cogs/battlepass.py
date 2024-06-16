@@ -160,7 +160,7 @@ class BattlepassCog(commands.Cog):
             next_redemption_time = (last_redeemed + datetime.timedelta(hours=24)).strftime('%Y-%m-%d %I:%M %p')
 
             # Check if it has been at least 24 hours
-            if time_since_redemption.total_seconds >= 86400: # 24 hours = 86400 seconds
+            if time_since_redemption.total_seconds() >= 86400: # 24 hours = 86400 seconds
                 points = db.retrieve_points(user_id=user_id)
                 points_gained = 100
 

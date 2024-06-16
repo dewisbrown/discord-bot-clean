@@ -228,17 +228,13 @@ class MiscCog(commands.Cog):
     async def updates(self, ctx):
         '''Bot changes and updates listed in embed.'''
         # Update timestamp each time new updates are posted
-        embed = discord.Embed(title='GummyBot Updates', timestamp=datetime.datetime(year=2024, month=5, day=7, hour=7, minute=0))
+        embed = discord.Embed(title='GummyBot Updates', timestamp=datetime.datetime(year=2024, month=6, day=16, hour=9, minute=20))
         embed.set_footer(text='Changes to the bot were made at the following timestamp')
         embed.set_thumbnail(url='https://64.media.tumblr.com/84f68fd1ada52c9840b2dbe497f7eeb1/tumblr_ox2sd2eAXn1v64bqao5_r1_400.png')
 
         # Input changes made, adjust when new features added
         changes = [
-            ['Music commands', 'Changed how bot plays audio. Uses stream instead of downloading mp3.'],
-            ['`$elijah`', 'New embed for this command. Contains image and new text.'],
-            ['`$submit_item`', 'Submit items to the shop by providing a name and rarity.'],
-            ['Dynamic shop prices', 'Shop prices are calculated every shop refresh. Small chance for low prices.'],
-            ['Points increase with level', 'Tiering up allows you to receive more points through the `$points` command.']
+            ['`$daily`', 'New command to earn points daily.'],
         ]
 
         for change in changes:

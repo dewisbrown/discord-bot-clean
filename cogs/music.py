@@ -32,27 +32,15 @@ class MusicCog(commands.Cog):
         '''Print statment to ensure loads properly.'''
         logging.info('Music Cog loaded.')
 
-    # @commands.command()
-    # async def queue(self, ctx):
-    #     """
-    #     Displays the music queue.
-    #     """
-    #     logging.info('Queue command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
-    #     if ctx.guild.id in self.queues:
-    #         if len(self.queues[ctx.guild.id]) == 0:
-    #             await ctx.send('The queue is empty.')
-    #         else:
-    #             note_emoji = '\U0001F3B5'
-    #             embed = discord.Embed(title=f'{note_emoji}  **Current Queue | {len(self.queues[ctx.guild.id])} entries**', timestamp=datetime.datetime.now())
-    #             message = ''
-
-    #             for index, title in enumerate(self.queue_info[ctx.guild.id]):
-    #                 message += f'`{index + 1}` | **{title}**\n'
-
-    #             embed.add_field(name='', value=message, inline=False)
-    #             await ctx.send(embed=embed)
-    #     else:
-    #         await ctx.send('There is no queue.')
+    async def play_next(self, ctx):
+        """
+        Continues player if queue exists.
+        """
+        if self.queues[ctx.guild.id] != []:
+            url = self.queues[ctx.guild.id].pop(0)
+            await self.play(ctx, url=url)
+        else:
+            self.stop(ctx)
 
     @commands.command()
     async def play(self, ctx, *, url):
@@ -74,33 +62,15 @@ class MusicCog(commands.Cog):
                 if ctx.guild.id not in self.queues:
                     self.queues[ctx.guild.id] = []
                 self.queues[ctx.guild.id].append(url)
-
-                # Initialize queue_info list if doesn't exist for the guild
-                # if ctx.guild.id not in self.queue_info:
-                #     self.queue_info[ctx.guild.id] = []
-                # self.queue_info[ctx.guild.id].append(self.get_queue_info(url))
             else:
                 voice_client = await ctx.author.voice.channel.connect()
                 self.voice_clients[voice_client.guild.id] = voice_client
 
-                # Initialize queue list if doesn't exist for the guild
-                if ctx.guild.id not in self.queues:
-                    self.queues[ctx.guild.id] = []
-                self.queues[ctx.guild.id].append(url)
-
-                # Initialize queue_info list if doesn't exist for the guild
-                # if ctx.guild.id not in self.queue_info:
-                #     self.queue_info[ctx.guild.id] = []
-                # self.queue_info[ctx.guild.id].append(self.get_queue_info(url))
-
-                while len(self.queues[ctx.guild.id]) > 0:
-                    url = self.queues[ctx.guild.id].pop(0)
-                    song = self.get_stream_url(url=url)
-                    player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
-                    self.voice_clients[ctx.guild.id].play(player)
-
-                    while self.voice_clients[ctx.guild.id].is_playing():
-                        await asyncio.sleep(1)
+                loop = asyncio.get_event_loop()
+                song = await loop.run_in_executor(None, lambda: self.get_stream_url(url=url))
+                
+                player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
+                self.voice_clients[ctx.guild.id].play(player, after=lambda e: asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop))
         except Exception as e:
             logging.error('Failed to play song: %s',str(e))
 
@@ -110,23 +80,32 @@ class MusicCog(commands.Cog):
         Stops current song playing and plays next song in queue.
         """
         logging.info('Skip command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
-        # note_emoji = '\U0001F3B5'
-        cowboy_emoji = '\U0001F920'
-
-        if self.voice_clients[ctx.guild.id] and self.voice_clients[ctx.guild.id].is_playing():
+        try:
             self.voice_clients[ctx.guild.id].stop()
-            # skipped_song = self.queue_info[ctx.guild.id].pop(0)
-            # await ctx.reply(f'{cowboy_emoji} Skipped **{skipped_song}**')
+            await self.play_next(ctx)
+            await ctx.send('Skipped current track.')
+        except Exception as e:
+            logging.error('%s', str(e))
 
-            if len(self.queues[ctx.guild.id]) > 0:
-                url = self.queues[ctx.guild.id].pop(0)
-                song = self.get_stream_url(url)
-                player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
-                self.voice_clients[ctx.guild.id].play(player)
-            else:
-                await self.stop(ctx)
+    @commands.command()
+    async def queue(self, ctx, *, url):
+        """
+        Add song to music queue.
+        """
+        if ctx.guild.id not in self.queues:
+            self.queues[ctx.guild.id] = []
+        self.queues[ctx.guild.id].append(url)
+        await ctx.send('Song has been added to the queue.')
+
+    @commands.command()
+    async def clear_queue(self, ctx):
+        """
+        Clears music queue.
+        """
+        if ctx.guild.id in self.queues:
+            self.queues[ctx.guild.id].clear()
         else:
-            await ctx.send('There is no song currently playing.')
+            await ctx.send('There is no queue to clear.')
 
     @commands.command()
     async def shuffle(self, ctx):
@@ -184,7 +163,6 @@ class MusicCog(commands.Cog):
             await self.voice_clients[ctx.guild.id].disconnect()
             del self.voice_clients[ctx.guild.id]
             del self.queues[ctx.guild.id]
-            # del self.queue_info[ctx.guild.id]
         except Exception as e:
             logging.error('Failed to stop playback: %s', str(e))
 

@@ -36,11 +36,11 @@ class MusicCog(commands.Cog):
         """
         Continues player if queue exists.
         """
-        if self.queues[ctx.guild.id] != []:
+        if ctx.guild.id in self.queues and len(self.queue[ctx.guild.id]) > 0:
             url = self.queues[ctx.guild.id].pop(0)
             await self.play(ctx, url=url)
         else:
-            self.stop(ctx)
+            await self.stop(ctx)
 
     @commands.command()
     async def play(self, ctx, *, url):
@@ -58,17 +58,12 @@ class MusicCog(commands.Cog):
         try:
             # Check if voice client exists for guild
             if ctx.guild.id in self.voice_clients:
-                # Initialize queue list if doesn't exist for the guild
-                if ctx.guild.id not in self.queues:
-                    self.queues[ctx.guild.id] = []
-                self.queues[ctx.guild.id].append(url)
+                await ctx.send('Bot is already playing. Use `$queue` to add songs to the queue.')
             else:
                 voice_client = await ctx.author.voice.channel.connect()
                 self.voice_clients[voice_client.guild.id] = voice_client
 
-                loop = asyncio.get_event_loop()
-                song = await loop.run_in_executor(None, lambda: self.get_stream_url(url=url))
-                
+                song = self.get_stream_url(url=url)
                 player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
                 self.voice_clients[ctx.guild.id].play(player, after=lambda e: asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop))
         except Exception as e:

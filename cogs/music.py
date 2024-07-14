@@ -1,10 +1,13 @@
 import asyncio
 import os
 import datetime
+import urllib.parse, urllib.request
+import re
 import logging
 import random
 import discord
 import spotipy
+import yt_dlp
 from pytube import YouTube
 from pytube import Search
 from dotenv import load_dotenv
@@ -25,6 +28,11 @@ class MusicCog(commands.Cog):
             'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
             'options': '-vn -filter:a "volume=0.25"'
         }
+        self.yt_dl_options = {"format": "bestaudio/best"}
+        self.ytdl = yt_dlp.YoutubeDL(self.yt_dl_options)
+        self.youtube_base_url = 'https://www.youtube.com/'
+        self.youtube_results_url = self.youtube_base_url + 'results?'
+        self.youtube_watch_url = self.youtube_base_url + 'watch?v='
         load_dotenv()
 
     @commands.Cog.listener()
@@ -179,12 +187,19 @@ class MusicCog(commands.Cog):
         Extracts stream url from YouTube link, search terms, or Spotify link.
         """
         if self.is_yt_url(user_input=url):
-            return YouTube(url).streams.filter(only_audio=True).first().url
+            return self.ytdl.extract_info(url, download=False)
         elif self.is_spotify_url(user_input=url):
-            search_terms = self.get_search_terms(url)
-            return Search(search_terms).results[0].streams.filter(only_audio=True).first().url
+            query_string = urllib.parse.urlencode({'search_query': self.get_search_terms(url)})
+            content = urllib.request.urlopen(self.youtube_results_url + query_string)
+            search_results = re.findall(r'/watch\?v=(.{11})', content.read().decode())
+            link = self.youtube_watch_url + search_results[0]
+            return link
         else:
-            return Search(url).results[0].streams.filter(only_audio=True).first().url
+            query_string = urllib.parse.urlencode({'search_query': url})
+            content = urllib.request.urlopen(self.youtube_results_url + query_string)
+            search_results = re.findall(r'/watch\?v=(.{11})', content.read().decode())
+            link = self.youtube_watch_url + search_results[0]
+            return link
 
     def is_yt_url(self, user_input: str) -> bool:
         """

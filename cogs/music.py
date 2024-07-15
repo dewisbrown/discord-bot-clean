@@ -8,8 +8,6 @@ import random
 import discord
 import spotipy
 import yt_dlp
-from pytube import YouTube
-from pytube import Search
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyClientCredentials
 from discord.ext import commands
@@ -20,10 +18,9 @@ class MusicCog(commands.Cog):
     Commands that handle music playing in voice channel.
     """
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.queues = {}
         self.voice_clients = {}
-        # self.queue_info = {}
         self.ffmpeg_options = {
             'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
             'options': '-vn -filter:a "volume=0.25"'
@@ -44,6 +41,7 @@ class MusicCog(commands.Cog):
         """
         Continues player if queue exists.
         """
+        logging.info('play_next')
         if ctx.guild.id in self.queues and len(self.queue[ctx.guild.id]) > 0:
             url = self.queues[ctx.guild.id].pop(0)
             await self.play(ctx, url=url)
@@ -62,20 +60,36 @@ class MusicCog(commands.Cog):
             logging.info('Play command failed: [%s] is not in voice channel.', ctx.author.name)
             return
 
+        if ctx.guild.id not in self.voice_clients:
+            try:
+                voice_client = await ctx.author.voice.channel.connect()
+                self.voice_clients[ctx.guild.id] = voice_client
+            except Exception as e:
+                logging.error('%s', str(e))
+
         # note_emoji = '\U0001F3B5'
         try:
-            # Check if voice client exists for guild
-            if ctx.guild.id in self.voice_clients:
-                await ctx.send('Bot is already playing. Use `$queue` to add songs to the queue.')
-            else:
-                voice_client = await ctx.author.voice.channel.connect()
-                self.voice_clients[voice_client.guild.id] = voice_client
+            if self.youtube_base_url not in url:
+                query_string = urllib.parse.urlencode({
+                    'search_query': url
+                })
 
-                song = self.get_stream_url(url=url)
-                player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
-                self.voice_clients[ctx.guild.id].play(player, after=lambda e: asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop))
+                content = urllib.request.urlopen(
+                    self.youtube_results_url + query_string
+                )
+
+                search_results = re.findall(r'/watch\?v=(.{11})', content.read().decode())
+
+                url = self.youtube_watch_url + search_results[0]
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, lambda: self.ytdl.extract_info(url, download=False))
+
+            song = data['url']
+            player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
+
+            self.voice_clients[ctx.guild.id].play(player, after=lambda e: asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop))
         except Exception as e:
-            logging.error('Failed to play song: %s',str(e))
+            logging.error('%s', str(e))
 
     @commands.command()
     async def skip(self, ctx):
@@ -165,42 +179,12 @@ class MusicCog(commands.Cog):
             self.voice_clients[ctx.guild.id].stop()
             await self.voice_clients[ctx.guild.id].disconnect()
             del self.voice_clients[ctx.guild.id]
-            del self.queues[ctx.guild.id]
+            if ctx.guild.id in self.queues:
+                del self.queues[ctx.guild.id]
         except Exception as e:
             logging.error('Failed to stop playback: %s', str(e))
 
     # Helper functions
-    def get_queue_info(self, url: str) -> str:
-        """
-        Extracts song duration and title from url.
-        """
-        if self.is_yt_url(user_input=url):
-            return YouTube(url).streams.filter(only_audio=True).first().title
-        elif self.is_spotify_url(user_input=url):
-            search_terms = self.get_search_terms(url)
-            return Search(search_terms).results[0].streams.filter(only_audio=True).first().title
-        else:
-            return Search(url).results[0].streams.filter(only_audio=True).first().title
-
-    def get_stream_url(self, url: str) -> str:
-        """
-        Extracts stream url from YouTube link, search terms, or Spotify link.
-        """
-        if self.is_yt_url(user_input=url):
-            return self.ytdl.extract_info(url, download=False)
-        elif self.is_spotify_url(user_input=url):
-            query_string = urllib.parse.urlencode({'search_query': self.get_search_terms(url)})
-            content = urllib.request.urlopen(self.youtube_results_url + query_string)
-            search_results = re.findall(r'/watch\?v=(.{11})', content.read().decode())
-            link = self.youtube_watch_url + search_results[0]
-            return link
-        else:
-            query_string = urllib.parse.urlencode({'search_query': url})
-            content = urllib.request.urlopen(self.youtube_results_url + query_string)
-            search_results = re.findall(r'/watch\?v=(.{11})', content.read().decode())
-            link = self.youtube_watch_url + search_results[0]
-            return link
-
     def is_yt_url(self, user_input: str) -> bool:
         """
         Checks if input string is a YouTube url.

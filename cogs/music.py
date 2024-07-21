@@ -1,12 +1,13 @@
 import asyncio
 import os
 import datetime
+import urllib.parse, urllib.request
+import re
 import logging
 import random
 import discord
 import spotipy
-from pytube import YouTube
-from pytube import Search
+import yt_dlp
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyClientCredentials
 from discord.ext import commands
@@ -17,14 +18,18 @@ class MusicCog(commands.Cog):
     Commands that handle music playing in voice channel.
     """
     def __init__(self, bot):
-        self.bot = bot
-        self.queues = {}
-        self.voice_clients = {}
-        # self.queue_info = {}
-        self.ffmpeg_options = {
-            'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-            'options': '-vn -filter:a "volume=0.25"'
+        self.bot: commands.Bot = bot
+        self.url_queue = []
+        self.FFMPEG_OPTIONS = {'options': '-vn'}
+        self.YDL_OPTIONS = {
+            'format': 'bestaudio', 
+            'noplaylist' : True,
+            'default_search': 'ytsearch',
         }
+        self.ytdl = yt_dlp.YoutubeDL(self.YDL_OPTIONS)
+        self.youtube_base_url = 'https://www.youtube.com/'
+        self.youtube_results_url = self.youtube_base_url + 'results?'
+        self.youtube_watch_url = self.youtube_base_url + 'watch?v='
         load_dotenv()
 
     @commands.Cog.listener()
@@ -32,27 +37,32 @@ class MusicCog(commands.Cog):
         '''Print statment to ensure loads properly.'''
         logging.info('Music Cog loaded.')
 
-    # @commands.command()
-    # async def queue(self, ctx):
-    #     """
-    #     Displays the music queue.
-    #     """
-    #     logging.info('Queue command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
-    #     if ctx.guild.id in self.queues:
-    #         if len(self.queues[ctx.guild.id]) == 0:
-    #             await ctx.send('The queue is empty.')
-    #         else:
-    #             note_emoji = '\U0001F3B5'
-    #             embed = discord.Embed(title=f'{note_emoji}  **Current Queue | {len(self.queues[ctx.guild.id])} entries**', timestamp=datetime.datetime.now())
-    #             message = ''
+    async def play_next(self, ctx):
+        """
+        Continues player if queue exists.
+        """
+        logging.info('play_next')
+        if self.url_queue:
+            # Retrieve queue info and play
+            song = self.url_queue.pop(0)
+            source = await discord.FFmpegOpusAudio.from_probe(song['url'], **self.FFMPEG_OPTIONS)
+            
+            # Format duration seconds to MM:SS
+            td = datetime.timedelta(seconds=song['duration'])
+            minutes, seconds = divmod(td.seconds, 60)
+            duration = f'{minutes}:{seconds:02d}'
 
-    #             for index, title in enumerate(self.queue_info[ctx.guild.id]):
-    #                 message += f'`{index + 1}` | **{title}**\n'
+            # Create and send embed
+            embed = discord.Embed(title=f'Now Playing', timestamp=datetime.datetime.now())
+            embed.set_thumbnail(url=song['thumbnail'])
+            embed.add_field(name=f'**{song["title"]}** `({duration})`', value=f'*requested by {song["requester"]}*', inline=False)
+            embed.set_footer(text=f'Queue: {len(self.url_queue)}', icon_url=ctx.guild.icon.url)
+            await ctx.send(embed=embed)
 
-    #             embed.add_field(name='', value=message, inline=False)
-    #             await ctx.send(embed=embed)
-    #     else:
-    #         await ctx.send('There is no queue.')
+            # Play url
+            ctx.voice_client.play(source, after=lambda _:self.bot.loop.create_task(self.play_next(ctx)))
+        elif not ctx.voice_client.is_playing():
+            await ctx.send('Queue is empty.')
 
     @commands.command()
     async def play(self, ctx, *, url):
@@ -61,48 +71,38 @@ class MusicCog(commands.Cog):
         """
         logging.info('Play command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
 
-        if ctx.author.voice is None:
-            await ctx.send('You must be in a voice channel to run this command.')
-            logging.info('Play command failed: [%s] is not in voice channel.', ctx.author.name)
-            return
+        voice_channel = ctx.author.voice.channel if ctx.author.voice else None
+        if not voice_channel:
+            return await ctx.send('Join a voice channel to use this command.')
+        if not ctx.voice_client:
+            await voice_channel.connect()
+        
+        async with ctx.typing():
+            with yt_dlp.YoutubeDL(self.YDL_OPTIONS) as ydl:
+                if self.is_spotify_url(url):
+                    url = self.get_search_terms(url)
+                info = ydl.extract_info(url, download=False)
+                if 'entries' in info:
+                    info = info['entries'][0]
 
-        # note_emoji = '\U0001F3B5'
-        try:
-            # Check if voice client exists for guild
-            if ctx.guild.id in self.voice_clients:
-                # Initialize queue list if doesn't exist for the guild
-                if ctx.guild.id not in self.queues:
-                    self.queues[ctx.guild.id] = []
-                self.queues[ctx.guild.id].append(url)
+                # Extract song info from video: [url, title, thumbnail, duration, requester]
+                song = {
+                    'url': info['url'],
+                    'title': info['title'],
+                    'thumbnail': None,
+                    'duration': info['duration'],
+                    'requester': ctx.author.name,
+                }
 
-                # Initialize queue_info list if doesn't exist for the guild
-                # if ctx.guild.id not in self.queue_info:
-                #     self.queue_info[ctx.guild.id] = []
-                # self.queue_info[ctx.guild.id].append(self.get_queue_info(url))
-            else:
-                voice_client = await ctx.author.voice.channel.connect()
-                self.voice_clients[voice_client.guild.id] = voice_client
+                # Extract thumbnail url in .jpg format
+                for thumbnail in info['thumbnails']:
+                    if thumbnail['url'].endswith('.jpg'):
+                        song['thumbnail'] = thumbnail['url']
 
-                # Initialize queue list if doesn't exist for the guild
-                if ctx.guild.id not in self.queues:
-                    self.queues[ctx.guild.id] = []
-                self.queues[ctx.guild.id].append(url)
-
-                # Initialize queue_info list if doesn't exist for the guild
-                # if ctx.guild.id not in self.queue_info:
-                #     self.queue_info[ctx.guild.id] = []
-                # self.queue_info[ctx.guild.id].append(self.get_queue_info(url))
-
-                while len(self.queues[ctx.guild.id]) > 0:
-                    url = self.queues[ctx.guild.id].pop(0)
-                    song = self.get_stream_url(url=url)
-                    player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
-                    self.voice_clients[ctx.guild.id].play(player)
-
-                    while self.voice_clients[ctx.guild.id].is_playing():
-                        await asyncio.sleep(1)
-        except Exception as e:
-            logging.error('Failed to play song: %s',str(e))
+                self.url_queue.append(song)
+                await ctx.send(f'Added to queue: **{song["title"]}**')
+        if not ctx.voice_client.is_playing():
+            await self.play_next(ctx)
 
     @commands.command()
     async def skip(self, ctx):
@@ -110,23 +110,33 @@ class MusicCog(commands.Cog):
         Stops current song playing and plays next song in queue.
         """
         logging.info('Skip command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
-        # note_emoji = '\U0001F3B5'
-        cowboy_emoji = '\U0001F920'
+        if ctx.voice_client and ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
+            await ctx.send(f'Song skipped by *{ctx.author.name}*.')
 
-        if self.voice_clients[ctx.guild.id] and self.voice_clients[ctx.guild.id].is_playing():
-            self.voice_clients[ctx.guild.id].stop()
-            # skipped_song = self.queue_info[ctx.guild.id].pop(0)
-            # await ctx.reply(f'{cowboy_emoji} Skipped **{skipped_song}**')
-
-            if len(self.queues[ctx.guild.id]) > 0:
-                url = self.queues[ctx.guild.id].pop(0)
-                song = self.get_stream_url(url)
-                player = discord.FFmpegOpusAudio(song, **self.ffmpeg_options)
-                self.voice_clients[ctx.guild.id].play(player)
-            else:
-                await self.stop(ctx)
+    @commands.command()
+    async def queue(self, ctx):
+        """
+        Add song to music queue.
+        """
+        logging.info('Queue command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
+        if self.url_queue:
+            embed = discord.Embed(title=f'{ctx.guild} - Queue: {len(self.url_queue)}', timestamp=datetime.datetime.now())
+            for i, tup in enumerate(self.url_queue):
+                embed.add_field(name=f'{i + 1}. **{tup[1]}** - requested by *{tup[2]}*', value='', inline=False)
+            await ctx.send(embed=embed)
         else:
-            await ctx.send('There is no song currently playing.')
+            await ctx.send('The queue is empty.')
+
+    @commands.command()
+    async def clear_queue(self, ctx):
+        """
+        Clears music queue.
+        """
+        if self.url_queue:
+            self.url_queue.clear()
+        else:
+            await ctx.send('There is no queue to clear.')
 
     @commands.command()
     async def shuffle(self, ctx):
@@ -135,8 +145,8 @@ class MusicCog(commands.Cog):
         """
         logging.info('Shuffle command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
 
-        if len(self.queues[ctx.guild.id]) > 1:
-            random.shuffle(self.queues[ctx.guild.id])
+        if len(self.url_queue) > 1:
+            random.shuffle(self.url_queue)
         else:
             await ctx.send('There must be at least two songs in queue to shuffle.')
 
@@ -159,7 +169,7 @@ class MusicCog(commands.Cog):
         """
         logging.info('Pause command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
         try:
-            self.voice_clients[ctx.guild.id].pause()
+            ctx.voice_client.pause()
         except Exception as e:
             logging.error('Failed to pause: %s', str(e))
 
@@ -170,7 +180,7 @@ class MusicCog(commands.Cog):
         """
         logging.info('Resume command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
         try:
-            self.voice_clients[ctx.guild.id].resume()
+            ctx.voice_client.resume()
         except Exception as e:
             logging.error('Failed to resume playback: %s', str(e))
 
@@ -180,39 +190,12 @@ class MusicCog(commands.Cog):
         Stops bot playback in voice channel and cleans up guild dict entries.
         """
         try:
-            self.voice_clients[ctx.guild.id].stop()
-            await self.voice_clients[ctx.guild.id].disconnect()
-            del self.voice_clients[ctx.guild.id]
-            del self.queues[ctx.guild.id]
-            # del self.queue_info[ctx.guild.id]
+            ctx.voice_client.stop()
+            await ctx.voice_client.disconnect()
         except Exception as e:
             logging.error('Failed to stop playback: %s', str(e))
 
     # Helper functions
-    def get_queue_info(self, url: str) -> str:
-        """
-        Extracts song duration and title from url.
-        """
-        if self.is_yt_url(user_input=url):
-            return YouTube(url).streams.filter(only_audio=True).first().title
-        elif self.is_spotify_url(user_input=url):
-            search_terms = self.get_search_terms(url)
-            return Search(search_terms).results[0].streams.filter(only_audio=True).first().title
-        else:
-            return Search(url).results[0].streams.filter(only_audio=True).first().title
-
-    def get_stream_url(self, url: str) -> str:
-        """
-        Extracts stream url from YouTube link, search terms, or Spotify link.
-        """
-        if self.is_yt_url(user_input=url):
-            return YouTube(url).streams.filter(only_audio=True).first().url
-        elif self.is_spotify_url(user_input=url):
-            search_terms = self.get_search_terms(url)
-            return Search(search_terms).results[0].streams.filter(only_audio=True).first().url
-        else:
-            return Search(url).results[0].streams.filter(only_audio=True).first().url
-
     def is_yt_url(self, user_input: str) -> bool:
         """
         Checks if input string is a YouTube url.

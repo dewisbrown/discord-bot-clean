@@ -44,13 +44,19 @@ class MusicCog(commands.Cog):
         logging.info('play_next')
         if self.url_queue:
             # Retrieve queue info and play
-            url, title, requester = self.url_queue.pop(0)
-            source = await discord.FFmpegOpusAudio.from_probe(url, **self.FFMPEG_OPTIONS)
+            song = self.url_queue.pop(0)
+            source = await discord.FFmpegOpusAudio.from_probe(song['url'], **self.FFMPEG_OPTIONS)
             
+            # Format duration seconds to MM:SS
+            td = datetime.timedelta(seconds=song['duration'])
+            minutes, seconds = divmod(td.seconds, 60)
+            duration = f'{minutes}:{seconds:02d}'
+
             # Create and send embed
-            embed = discord.Embed(title=f'{ctx.guild} - Queue: {len(self.url_queue)}', timestamp=datetime.datetime.now())
-            embed.set_thumbnail(url='https://icon-library.com/images/music-player-icon-png/music-player-icon-png-20.jpg')
-            embed.add_field(name='Now Playing:', value=f'**{title}** - *requested by* {requester}', inline=False)
+            embed = discord.Embed(title=f'Now Playing', timestamp=datetime.datetime.now())
+            embed.set_thumbnail(url=song['thumbnail'])
+            embed.add_field(name=f'**{song["title"]}** `({duration})`', value=f'*requested by {song["requester"]}*', inline=False)
+            embed.set_footer(text=f'Queue: {len(self.url_queue)}', icon_url=ctx.guild.icon.url)
             await ctx.send(embed=embed)
 
             # Play url
@@ -76,17 +82,23 @@ class MusicCog(commands.Cog):
                 if self.is_spotify_url(url):
                     url = self.get_search_terms(url)
                 info = ydl.extract_info(url, download=False)
-                print(info['entries'][0].keys())
                 if 'entries' in info:
                     info = info['entries'][0]
+
                 # Extract song info from video: [url, title, thumbnail, duration, requester]
                 song = {
                     'url': info['url'],
                     'title': info['title'],
-                    'thumbnail': info['thumbnail'],
+                    'thumbnail': None,
                     'duration': info['duration'],
                     'requester': ctx.author.name,
                 }
+
+                # Extract thumbnail url in .jpg format
+                for thumbnail in info['thumbnails']:
+                    if thumbnail['url'].endswith('.jpg'):
+                        song['thumbnail'] = thumbnail['url']
+
                 self.url_queue.append(song)
                 await ctx.send(f'Added to queue: **{song["title"]}**')
         if not ctx.voice_client.is_playing():

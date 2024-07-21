@@ -79,11 +79,16 @@ class MusicCog(commands.Cog):
                 print(info['entries'][0].keys())
                 if 'entries' in info:
                     info = info['entries'][0]
-                # Extract info from video: (url, title, thumbnail, duration, requester)
-                url = info['url']
-                title = info['title']
-                self.url_queue.append((url, title, ctx.author.name))
-                await ctx.send(f'Added to queue: **{title}**')
+                # Extract song info from video: [url, title, thumbnail, duration, requester]
+                song = {
+                    'url': info['url'],
+                    'title': info['title'],
+                    'thumbnail': info['thumbnail'],
+                    'duration': info['duration'],
+                    'requester': ctx.author.name,
+                }
+                self.url_queue.append(song)
+                await ctx.send(f'Added to queue: **{song["title"]}**')
         if not ctx.voice_client.is_playing():
             await self.play_next(ctx)
 

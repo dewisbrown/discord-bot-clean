@@ -26,20 +26,26 @@ bot.remove_command('help')
 
 @bot.event
 async def on_ready():
-    '''Prints statment when bot is logged in.'''
+    """
+    Prints statment when bot is logged in.
+    """
     logging.info('Success! Logged in as %s', bot.user.name)
 
 
 @bot.event
 async def on_command_error(ctx, error):
-    '''Sends error message to user when command is not found.'''
+    """
+    Sends error message to user when command is not found.
+    """
     if isinstance(error, commands.CommandNotFound):
         await ctx.send('Command not found. Type `$help` for a list of commands.')
         logging.error('User input command that does not exist.')
 
 
 async def load():
-    '''Loads cogs for bots.'''
+    """
+    Loads cogs for bots.
+    """
     cogs_directory = os.path.join(os.path.dirname(__file__), 'cogs')
     cog_files = [f.split('.')[0] for f in os.listdir(cogs_directory) if f.endswith('.py')]
 
@@ -48,7 +54,9 @@ async def load():
 
 
 async def main():
-    '''Loads cogs and starts the bot login.'''
+    """
+    Loads cogs and starts the bot login.
+    """
     async with bot:
         await load()
         await bot.start(os.getenv('BOT_TOKEN'))

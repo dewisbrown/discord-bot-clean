@@ -51,3 +51,16 @@ def set_daily_redemption() -> None:
     conn.commit()
     cursor.close()
     conn.close()
+
+def update_user_points(points: int, user_name: str) -> None:
+    """
+    Manually set points for a user.
+    """
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    query = 'UPDATE battlepass SET points = ? WHERE user_name = ?'
+    cursor.execute(query, (points, user_name))
+
+    conn.commit()
+    conn.close()

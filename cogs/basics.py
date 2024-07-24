@@ -22,13 +22,17 @@ class BasicsCog(commands.Cog):
 
     @commands.command()
     async def hello(self, ctx):
-        '''Test command, replies hello!'''
+        """
+        Test command, replies hello!
+        """
         await ctx.send('Hello, I am your Discord bot!')
 
 
     @commands.command()
     async def age(self, ctx, user: discord.Member = None):
-        '''Returns days since joining server.'''
+        """
+        Returns days since joining server.
+        """
         if user is None:
             user = ctx.author
 

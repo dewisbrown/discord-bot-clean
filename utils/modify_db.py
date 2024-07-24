@@ -31,3 +31,18 @@ def update_user_points(points: int, user_name: str) -> None:
 
     conn.commit()
     conn.close()
+
+def create_battlepass_entry(entry: dict):
+    """
+    Create new battlepass record from entry data.
+    Entry dict should include: user_id (INT), points (INT),
+    last_awarded_at (DATETIME), level (INT), user_name (STR).
+    """
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    query = 'INSERT INTO battlepass (user_id, points, last_awarded_at, level, user_name) VALUES (?, ?, ?, ?, ?)'
+    cursor.execute(query, (entry['user_id'], entry['points'], entry['last_awarded_at'], entry['level'], entry['user_name']))
+
+    conn.commit()
+    conn.close()

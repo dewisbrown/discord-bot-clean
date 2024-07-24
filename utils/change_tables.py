@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import datetime
 
 
 rel_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'battlepass.db')
@@ -33,5 +34,20 @@ def print_table_columns(table_name: str) -> list:
     for col in col_info:
         print(col)
 
+    cursor.close()
+    conn.close()
+
+def set_daily_redemption() -> None:
+    """
+    Sets all users' 'daily_redemption' to 1 day ago.
+    """
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+    query = 'UPDATE battlepass SET daily_redemption = ?'
+    cursor.execute(query, (yesterday,))
+
+    conn.commit()
     cursor.close()
     conn.close()

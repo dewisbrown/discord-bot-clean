@@ -1,8 +1,10 @@
 import sqlite3
 import datetime
+import os
 
-from . import DB_FILE
 
+rel_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'battlepass.db')
+DB_FILE = os.path.abspath(rel_path)
 
 def set_daily_redemption() -> None:
     """

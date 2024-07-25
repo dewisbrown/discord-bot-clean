@@ -1,7 +1,9 @@
 import sqlite3
+import os
 
-from . import DB_FILE
 
+rel_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'battlepass.db')
+DB_FILE = os.path.abspath(rel_path)
 
 def add_column_to_table(table_name: str, col_name: str, col_type: str) -> None:
     """

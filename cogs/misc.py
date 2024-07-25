@@ -1,21 +1,15 @@
-import os
-import sys
+"""
+Misc commands for the bot that don't fit in other cogs.
+"""
 import random
 import logging
 import requests
 import datetime
+
 import discord
 from discord.ext import commands
 from bs4 import BeautifulSoup
 
-# Get the current and parent directories
-current_dir = os.path.dirname(os.path.realpath(__file__))
-parent_dir = os.path.dirname(current_dir)
-
-# Append the parent directory to the system path
-sys.path.append(parent_dir)
-
-# Import from parent directory
 import utils
 
 
@@ -47,7 +41,7 @@ class MiscCog(commands.Cog):
         embed = discord.Embed(timestamp=datetime.datetime.now())
 
         if command:
-            info = utils.command_info(command=command)
+            info = utils.get_command_help(command=command)
             if info:
                 embed = discord.Embed(title=f'Command Help - {command.capitalize()}', description=info['description'])
                 embed.add_field(name='Command syntax', value=info['syntax'], inline=False)
@@ -55,29 +49,29 @@ class MiscCog(commands.Cog):
             else:
                 await ctx.send(f'There is no command `${command}`. Submit `$help` to see list of commands.')
         else:
-            battlepass_commands = f'''`$battlepass` - {utils.command_info('battlepass')['description']}\n
-                        `$points` - {utils.command_info('points')['description']}\n
-                        `$daily` - {utils.command_info('daily')['description']}\n
-                        `$register` - {utils.command_info('register')['description']}\n
-                        `$tierup` - {utils.command_info('tierup')['description']}\n
-                        `$top5` - {utils.command_info('top5')['description']}'''
+            battlepass_commands = f'''`$battlepass` - {utils.get_command_help('battlepass')['description']}\n
+                        `$points` - {utils.get_command_help('points')['description']}\n
+                        `$daily` - {utils.get_command_help('daily')['description']}\n
+                        `$register` - {utils.get_command_help('register')['description']}\n
+                        `$tierup` - {utils.get_command_help('tierup')['description']}\n
+                        `$top5` - {utils.get_command_help('top5')['description']}'''
 
-            shop_commands = f'''`$buy` - {utils.command_info('buy')['description']}\n
-                        `$inventory` - {utils.command_info('inventory')['description']}\n
-                        `$shop` - {utils.command_info('shop')['description']}\n
-                        `$submit_item` - {utils.command_info('submit_item')['description']}'''
+            shop_commands = f'''`$buy` - {utils.get_command_help('buy')['description']}\n
+                        `$inventory` - {utils.get_command_help('inventory')['description']}\n
+                        `$shop` - {utils.get_command_help('shop')['description']}\n
+                        `$submit_item` - {utils.get_command_help('submit_item')['description']}'''
 
-            music_commands = f'''`$play` - {utils.command_info('play')['description']}\n
-                        `$queue` - {utils.command_info('queue')['description']}\n
-                        `$stop` - {utils.command_info('stop')['description']}\n'''
+            music_commands = f'''`$play` - {utils.get_command_help('play')['description']}\n
+                        `$queue` - {utils.get_command_help('queue')['description']}\n
+                        `$stop` - {utils.get_command_help('stop')['description']}\n'''
 
-            misc_commands = f'''`$game` - {utils.command_info('game')['description']}\n
-                        `$discordstatus` - {utils.command_info('discordstatus')['description']}\n
-                        `$age` - {utils.command_info('age')['description']}\n
-                        `$updates` - {utils.command_info('updates')['description']}\n
-                        `$ufc` - {utils.command_info('ufc')['description']}\n
-                        `$elijah` - {utils.command_info('elijah')['description']}\n
-                        `$mark` - {utils.command_info('mark')['description']}'''
+            misc_commands = f'''`$game` - {utils.get_command_help('game')['description']}\n
+                        `$discordstatus` - {utils.get_command_help('discordstatus')['description']}\n
+                        `$age` - {utils.get_command_help('age')['description']}\n
+                        `$updates` - {utils.get_command_help('updates')['description']}\n
+                        `$ufc` - {utils.get_command_help('ufc')['description']}\n
+                        `$elijah` - {utils.get_command_help('elijah')['description']}\n
+                        `$mark` - {utils.get_command_help('mark')['description']}'''
 
             # All commands
             embed.title = 'Command Help'

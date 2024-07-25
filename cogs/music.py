@@ -27,9 +27,6 @@ class MusicCog(commands.Cog):
             'default_search': 'ytsearch',
         }
         self.ytdl = yt_dlp.YoutubeDL(self.YDL_OPTIONS)
-        self.youtube_base_url = 'https://www.youtube.com/'
-        self.youtube_results_url = self.youtube_base_url + 'results?'
-        self.youtube_watch_url = self.youtube_base_url + 'watch?v='
         load_dotenv()
 
     @commands.Cog.listener()
@@ -53,7 +50,7 @@ class MusicCog(commands.Cog):
             duration = f'{minutes}:{seconds:02d}'
 
             # Create and send embed
-            embed = discord.Embed(title=f'Now Playing', timestamp=datetime.datetime.now())
+            embed = discord.Embed(title='Now Playing', timestamp=datetime.datetime.now())
             embed.set_thumbnail(url=song['thumbnail'])
             embed.add_field(name=f'**{song["title"]}** `({duration})`', value=f'*requested by {song["requester"]}*', inline=False)
             embed.set_footer(text=f'Queue: {len(self.url_queue)}', icon_url=ctx.guild.icon.url)

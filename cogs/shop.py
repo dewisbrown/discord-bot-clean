@@ -47,10 +47,10 @@ class ShopCog(commands.Cog):
         logging.info('Inventory command submitted by [%s:%s]', ctx.author, ctx.author.id)
         if user_name:
             # Check if user is in same guild as ctx.author
-            user_id = db.get_user_id(user_name=user_name, guild_id=ctx.author.guild.id)
+            user_id = utils.get_user_id(user_name=user_name, guild_id=ctx.author.guild.id)
             if user_id:
                 user_id = int(user_id[0])
-                items = db.retrieve_inventory(user_id=user_id)
+                items = utils.retrieve_inventory(user_id=user_id)
                 if items:
                     embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
                     embed.set_author(name=user_name)
@@ -64,7 +64,7 @@ class ShopCog(commands.Cog):
                 await ctx.send(f'The user [{user_name}] is not in this guild or has not registered for the battlepass.')
         else:
             user_id = ctx.author.id
-            items = db.retrieve_inventory(user_id=user_id)
+            items = utils.retrieve_inventory(user_id=user_id)
 
             if items:
                 embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
@@ -84,7 +84,7 @@ class ShopCog(commands.Cog):
         guild_id = ctx.author.guild.id
 
         # Check if user is registered for battlepass
-        user = db.get_user_id(user_id=user_id)
+        user = utils.get_user_id(user_id=user_id)
         if user is None:
             await ctx.send('''Register for the battlepass to earn 
                            points and purchase items by using the 
@@ -95,13 +95,13 @@ class ShopCog(commands.Cog):
         item = shop.get(item_name)
         if item:
             # Check if user already owns the item
-            owned_item = db.retrieve_owned_item(user_id=user_id, item_name=item_name)
+            owned_item = utils.retrieve_owned_item(user_id=user_id, item_name=item_name)
             if owned_item:
                 await ctx.send('You already own this item.')
                 return
 
             # Check if user has enough points to purchase item
-            points = int(db.retrieve_points(user_id=user_id))
+            points = int(utils.retrieve_points(user_id=user_id))
             rarity = item[0]
             value = item[1]
 
@@ -110,10 +110,10 @@ class ShopCog(commands.Cog):
 
             if points >= value:
                 # Deduct item value from user points
-                db.update_points(user_id=user_id, points=points - value)
+                utils.update_points(user_id=user_id, points=points - value)
 
                 # Add item to user inventory
-                db.update_inventory(
+                utils.update_inventory(
                     user_id=user_id,
                     guild_id=guild_id,
                     item_name=item_name,
@@ -171,7 +171,7 @@ class ShopCog(commands.Cog):
                 return
 
             # If all args are valid, add to shop_submission table
-            db.create_shop_submission(
+            utils.create_shop_submission(
                 user_id=user_id,
                 user_name=user_name,
                 submit_time=datetime.datetime.now(),
@@ -202,7 +202,7 @@ class ShopCog(commands.Cog):
         embed = discord.Embed(title='Item Submissions', timestamp=datetime.datetime.now())
         # embed.set_thumbnail(url='')
 
-        items = db.retrieve_shop_submissions()
+        items = utils.retrieve_shop_submissions()
         for item in items:
             embed.add_field(name=f'{item[5]}: {item[4]}', value=f'Submitted by: {item[2]}', inline=False)
 
@@ -215,7 +215,7 @@ async def refresh_shop():
     global shop
     shop.clear()
 
-    shop_items = db.retrieve_shop_items()
+    shop_items = utils.retrieve_shop_items()
     for item in shop_items:
         item_name = item[0]
         rarity = item[1]

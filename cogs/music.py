@@ -29,7 +29,9 @@ class MusicCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        '''Print statment to ensure loads properly.'''
+        """
+        Print statment to ensure loads properly.
+        """
         logging.info('Music Cog loaded.')
 
     async def play_next(self, ctx):
@@ -222,4 +224,7 @@ class MusicCog(commands.Cog):
         return f"{track['name']} {track['artists'][0]['name']}"
 
 async def setup(bot):
+    """
+    Adds music cog to bot.
+    """
     await bot.add_cog(MusicCog(bot))

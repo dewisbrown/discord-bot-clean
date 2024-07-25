@@ -221,7 +221,9 @@ class MiscCog(commands.Cog):
 
     @commands.command()
     async def updates(self, ctx):
-        '''Bot changes and updates listed in embed.'''
+        """
+        Bot changes and updates listed in embed.
+        """
         # Update timestamp each time new updates are posted
         embed = discord.Embed(title='GummyBot Updates', timestamp=datetime.datetime(year=2024, month=6, day=16, hour=9, minute=20))
         embed.set_footer(text='Changes to the bot were made at the following timestamp')

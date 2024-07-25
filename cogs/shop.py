@@ -14,7 +14,9 @@ shop = {}
 refresh_time = datetime.datetime.now()
 
 class ShopCog(commands.Cog):
-    '''Commands for viewing item shop, buying, and viewing own inventory.'''
+    """
+    Commands for viewing item shop, buying, and viewing own inventory.
+    """
     def __init__(self, bot):
         self.bot = bot
         refresh_shop.start()
@@ -22,13 +24,17 @@ class ShopCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        '''Print statment to ensure loads properly.'''
+        """
+        Print statment to ensure loads properly.
+        """
         logging.info('Shop Cog loaded.')
 
 
     @commands.command()
     async def shop(self, ctx):
-        '''Prints the shop items and values.'''
+        """
+        Prints the shop items and values.
+        """
         embed = discord.Embed(title='Item Shop', description=f'Refreshes at {refresh_time.strftime("%H:%M %Z")}', timestamp=datetime.datetime.now())
         embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
         embed.set_thumbnail(url='https://wallpapercave.com/wp/wp7879327.jpg')
@@ -43,7 +49,9 @@ class ShopCog(commands.Cog):
 
     @commands.command()
     async def inventory(self, ctx, user_name=None):
-        '''Lists the user's inventory.'''
+        """
+        Lists the user's inventory.
+        """
         logging.info('Inventory command submitted by [%s:%s]', ctx.author, ctx.author.id)
         if user_name:
             # Check if user is in same guild as ctx.author
@@ -79,7 +87,9 @@ class ShopCog(commands.Cog):
 
     @commands.command()
     async def buy(self, ctx, *, item_name):
-        '''Purchase item from shop.'''
+        """
+        Purchase item from shop.
+        """
         user_id = ctx.author.id
         guild_id = ctx.author.guild.id
 
@@ -211,7 +221,9 @@ class ShopCog(commands.Cog):
 
 @tasks.loop(minutes=30)
 async def refresh_shop():
-    '''Updates shop with ten new items every thirty minutes.'''
+    """
+    Updates shop with ten new items every thirty minutes.
+    """
     global shop
     shop.clear()
 
@@ -227,7 +239,9 @@ async def refresh_shop():
 
 
 def set_shop_refresh_time(timestamp):
-    '''Updates shop refresh time whenever refresh_shop task runs.'''
+    """
+    Updates shop refresh time whenever refresh_shop task runs.
+    """
     global refresh_time
     refresh_time = timestamp
 
@@ -260,5 +274,7 @@ def calculate_value(rarity: str) -> int:
 
 
 async def setup(bot):
-    '''Runs when bot.load_extension() is called.'''
+    """
+    Runs when bot.load_extension() is called. Adds shop cog to bot.
+    """
     await bot.add_cog(ShopCog(bot))

@@ -192,15 +192,6 @@ class MusicCog(commands.Cog):
         except Exception as e:
             logging.error('Failed to stop playback: %s', str(e))
 
-    # Helper functions
-    def is_yt_url(self, user_input: str) -> bool:
-        """
-        Checks if input string is a YouTube url.
-        """
-        if 'https://www.youtube.com/' in user_input:
-            return True
-        return False
-
     def is_spotify_url(self, user_input: str) -> bool:
         """
         Checks if input string is a spotify url.

@@ -153,12 +153,6 @@ def calculate_points(level: int) -> int:
         return total_points * 2
     return total_points
 
-def decimal_to_hex(decimal: int) -> str:
-    """
-    Converts decimal number to hexadecimal string.
-    """
-    return hex(decimal).split('x')[-1]
-
 def points_to_level_up(level: int) -> int:
     """
     Calculates points required to increase level

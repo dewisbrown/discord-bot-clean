@@ -1,21 +1,9 @@
-import sys
-import os
 import logging
 import datetime
 
 import discord
 from discord.ext import commands
 
-import db_interface as db
-
-# Get the current and parent directories
-current_dir = os.path.dirname(os.path.realpath(__file__))
-parent_dir = os.path.dirname(current_dir)
-
-# Append the parent directory to the system path
-sys.path.append(parent_dir)
-
-# Import from parent directory
 import utils
 
 
@@ -54,12 +42,12 @@ class BattlepassCog(commands.Cog):
         registration_timestamp = datetime.datetime.now()
         daily_timestamp = datetime.datetime.now()
 
-        user_exists = db.get_user_id(user_id=user_id)
+        user_exists = utils.get_user_id(user_id=user_id)
 
         if user_exists:
             await ctx.send("You are already registered.")
         else:
-            db.create_user(
+            utils.create_user(
                 user_id=user_id,
                 guild_id=guild_id,
                 redemption_time=registration_timestamp,
@@ -91,7 +79,7 @@ class BattlepassCog(commands.Cog):
         guild_id = ctx.author.guild.id
         guild_name = ctx.author.guild.name
 
-        redemption_time_str = db.retrieve_redemption_time(user_id=user_id)
+        redemption_time_str = utils.retrieve_redemption_time(user_id=user_id)
 
         if redemption_time_str:
             last_redeemed = datetime.datetime.strptime(redemption_time_str, '%Y-%m-%d %H:%M:%S.%f')
@@ -101,12 +89,12 @@ class BattlepassCog(commands.Cog):
 
             # Check if it has been at least 15 minutes
             if time_since_redemption.total_seconds() >= 900: # 15 minutes
-                points = db.retrieve_points(user_id=user_id)
-                level = db.retrieve_level(user_id=user_id)
+                points = utils.retrieve_points(user_id=user_id)
+                level = utils.retrieve_level(user_id=user_id)
                 points_gained = utils.points(level=level)
 
-                db.update_points(user_id=user_id, points=(points_gained + points))
-                db.update_redemption_time(user_id=user_id, current_time=current_time)
+                utils.update_points(user_id=user_id, points=(points_gained + points))
+                utils.update_redemption_time(user_id=user_id, current_time=current_time)
 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
                 embed.set_author(name=f'Requested by {user_name}', icon_url=ctx.author.avatar)
@@ -151,7 +139,7 @@ class BattlepassCog(commands.Cog):
         guild_id = ctx.author.guild.id
         guild_name = ctx.author.guild.name
 
-        daily_redemption_str = db.retrieve_daily_redemption_time(user_id=user_id)
+        daily_redemption_str = utils.retrieve_daily_redemption_time(user_id=user_id)
 
         if daily_redemption_str:
             last_redeemed = datetime.datetime.strptime(daily_redemption_str, '%Y-%m-%d %H:%M:%S.%f')
@@ -161,11 +149,11 @@ class BattlepassCog(commands.Cog):
 
             # Check if it has been at least 24 hours
             if time_since_redemption.total_seconds() >= 86400: # 24 hours = 86400 seconds
-                points = db.retrieve_points(user_id=user_id)
+                points = utils.retrieve_points(user_id=user_id)
                 points_gained = 100
 
-                db.update_points(user_id=user_id, points=(points_gained + points))
-                db.update_daily_redemption_time(user_id=user_id, current_time=current_time)
+                utils.update_points(user_id=user_id, points=(points_gained + points))
+                utils.update_daily_redemption_time(user_id=user_id, current_time=current_time)
 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
                 embed.set_author(name=f'Requested by {user_name}', icon_url=ctx.author.avatar)
@@ -209,8 +197,8 @@ class BattlepassCog(commands.Cog):
         guild_id = ctx.author.guild.id
         guild_name = ctx.author.guild.name
 
-        current_level = db.retrieve_level(user_id=user_id)
-        points = db.retrieve_points(user_id=user_id)
+        current_level = utils.retrieve_level(user_id=user_id)
+        points = utils.retrieve_points(user_id=user_id)
 
         if points:
             points_to_level_up = utils.points_to_level_up(current_level)
@@ -218,8 +206,8 @@ class BattlepassCog(commands.Cog):
             embed.set_author(name=user_name, icon_url=ctx.author.avatar)
 
             if points >= points_to_level_up:
-                db.update_level(user_id=user_id, level=(current_level + 1))
-                db.update_points(user_id=user_id, points=(points - points_to_level_up))
+                utils.update_level(user_id=user_id, level=(current_level + 1))
+                utils.update_points(user_id=user_id, points=(points - points_to_level_up))
 
                 embed.set_thumbnail(url='https://res.cloudinary.com/teepublic/image/private/s--V423wCbg--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/t_watermark_lock/c_limit,f_auto,h_630,q_90,w_630/v1535464012/production/designs/3077990_0.jpg')
                 embed.add_field(name=f'You leveled up to level: {current_level + 1}', value=f'Points after tier up: {points - points_to_level_up}', inline=False)
@@ -252,11 +240,11 @@ class BattlepassCog(commands.Cog):
 
         if user:
             # Check if user is in same guild as ctx.author
-            user_id = db.get_user_id(user_name=user, guild_id=ctx.author.guild.id)
+            user_id = utils.get_user_id(user_name=user, guild_id=ctx.author.guild.id)
             if user_id:
                 user_id = int(user_id[0])
-                points = db.retrieve_points(user_id=user_id)
-                level = db.retrieve_level(user_id=user_id)
+                points = utils.retrieve_points(user_id=user_id)
+                level = utils.retrieve_level(user_id=user_id)
                 if points:
                     embed = discord.Embed(title=f'[{guild_name}] Battlepass Progress', timestamp=datetime.datetime.now())
                     embed.set_author(name=user)
@@ -269,8 +257,8 @@ class BattlepassCog(commands.Cog):
                 await ctx.send(f'`{user}` is either not in this guild or has not registered for the battlepass.')
         else:
             # Get user points and level
-            points = db.retrieve_points(user_id=user_id)
-            level = db.retrieve_level(user_id=user_id)
+            points = utils.retrieve_points(user_id=user_id)
+            level = utils.retrieve_level(user_id=user_id)
 
             if points:
                 embed = discord.Embed(title=f'[{guild_name}] Battlepass Progress', timestamp=datetime.datetime.now())
@@ -294,7 +282,7 @@ class BattlepassCog(commands.Cog):
         embed = discord.Embed(title='Top 5 Battlepass Members', description='Sorted by level and points.', timestamp=datetime.datetime.now())
         embed.set_thumbnail(url='https://ih1.redbubble.net/image.660900869.4748/pp,504x498-pad,600x600,f8f8f8.u8.jpg')
 
-        results = db.retrieve_top_five(guild_id=guild_id)
+        results = utils.retrieve_top_five(guild_id=guild_id)
         for result in results:
             user_name, level, points = result
             embed.add_field(name=user_name, value=f'Level: {level} Points: {points}', inline=False)

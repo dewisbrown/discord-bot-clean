@@ -1,9 +1,14 @@
-import logging, datetime, math, random
-import discord, pytz
+import logging
+import datetime
+import math
+import random
+
+import discord
+import pytz
 from discord.ext import commands, tasks
-import db_interface as db
 import discord.ext
 
+import utils
 
 shop = {}
 refresh_time = datetime.datetime.now()

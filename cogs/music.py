@@ -1,10 +1,8 @@
-import asyncio
 import os
 import datetime
-import urllib.parse, urllib.request
-import re
 import logging
 import random
+
 import discord
 import spotipy
 import yt_dlp

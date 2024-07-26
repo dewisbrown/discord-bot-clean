@@ -91,7 +91,7 @@ class BattlepassCog(commands.Cog):
             if time_since_redemption.total_seconds() >= 900: # 15 minutes
                 points = utils.retrieve_points(user_id=user_id)
                 level = utils.retrieve_level(user_id=user_id)
-                points_gained = utils.points(level=level)
+                points_gained = utils.calculate_points(level=level)
 
                 utils.update_points(user_id=user_id, points=(points_gained + points))
                 utils.update_redemption_time(user_id=user_id, current_time=current_time)

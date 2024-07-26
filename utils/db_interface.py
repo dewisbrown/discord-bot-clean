@@ -6,8 +6,8 @@ import sqlite3
 import os
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(BASE_DIR, 'data/battlepass.db') # change to test.db for testing
+rel_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'battlepass.db')
+DB_FILE = os.path.abspath(rel_path)
 
 def get_user_id(**kwargs):
     """

@@ -1,10 +1,8 @@
-import asyncio
 import os
 import datetime
-import urllib.parse, urllib.request
-import re
 import logging
 import random
+
 import discord
 import spotipy
 import yt_dlp
@@ -27,14 +25,13 @@ class MusicCog(commands.Cog):
             'default_search': 'ytsearch',
         }
         self.ytdl = yt_dlp.YoutubeDL(self.YDL_OPTIONS)
-        self.youtube_base_url = 'https://www.youtube.com/'
-        self.youtube_results_url = self.youtube_base_url + 'results?'
-        self.youtube_watch_url = self.youtube_base_url + 'watch?v='
         load_dotenv()
 
     @commands.Cog.listener()
     async def on_ready(self):
-        '''Print statment to ensure loads properly.'''
+        """
+        Print statment to ensure loads properly.
+        """
         logging.info('Music Cog loaded.')
 
     async def play_next(self, ctx):
@@ -53,7 +50,7 @@ class MusicCog(commands.Cog):
             duration = f'{minutes}:{seconds:02d}'
 
             # Create and send embed
-            embed = discord.Embed(title=f'Now Playing', timestamp=datetime.datetime.now())
+            embed = discord.Embed(title='Now Playing', timestamp=datetime.datetime.now())
             embed.set_thumbnail(url=song['thumbnail'])
             embed.add_field(name=f'**{song["title"]}** `({duration})`', value=f'*requested by {song["requester"]}*', inline=False)
             embed.set_footer(text=f'Queue: {len(self.url_queue)}', icon_url=ctx.guild.icon.url)
@@ -195,15 +192,6 @@ class MusicCog(commands.Cog):
         except Exception as e:
             logging.error('Failed to stop playback: %s', str(e))
 
-    # Helper functions
-    def is_yt_url(self, user_input: str) -> bool:
-        """
-        Checks if input string is a YouTube url.
-        """
-        if 'https://www.youtube.com/' in user_input:
-            return True
-        return False
-
     def is_spotify_url(self, user_input: str) -> bool:
         """
         Checks if input string is a spotify url.
@@ -227,4 +215,7 @@ class MusicCog(commands.Cog):
         return f"{track['name']} {track['artists'][0]['name']}"
 
 async def setup(bot):
+    """
+    Adds music cog to bot.
+    """
     await bot.add_cog(MusicCog(bot))

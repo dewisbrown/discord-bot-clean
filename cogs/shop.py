@@ -1,15 +1,22 @@
-import logging, datetime, math, random
-import discord, pytz
+import logging
+import datetime
+import math
+import random
+
+import discord
+import pytz
 from discord.ext import commands, tasks
-import db_interface as db
 import discord.ext
 
+import utils
 
 shop = {}
 refresh_time = datetime.datetime.now()
 
 class ShopCog(commands.Cog):
-    '''Commands for viewing item shop, buying, and viewing own inventory.'''
+    """
+    Commands for viewing item shop, buying, and viewing own inventory.
+    """
     def __init__(self, bot):
         self.bot = bot
         refresh_shop.start()
@@ -17,13 +24,17 @@ class ShopCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        '''Print statment to ensure loads properly.'''
+        """
+        Print statment to ensure loads properly.
+        """
         logging.info('Shop Cog loaded.')
 
 
     @commands.command()
     async def shop(self, ctx):
-        '''Prints the shop items and values.'''
+        """
+        Prints the shop items and values.
+        """
         embed = discord.Embed(title='Item Shop', description=f'Refreshes at {refresh_time.strftime("%H:%M %Z")}', timestamp=datetime.datetime.now())
         embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
         embed.set_thumbnail(url='https://wallpapercave.com/wp/wp7879327.jpg')
@@ -38,14 +49,16 @@ class ShopCog(commands.Cog):
 
     @commands.command()
     async def inventory(self, ctx, user_name=None):
-        '''Lists the user's inventory.'''
+        """
+        Lists the user's inventory.
+        """
         logging.info('Inventory command submitted by [%s:%s]', ctx.author, ctx.author.id)
         if user_name:
             # Check if user is in same guild as ctx.author
-            user_id = db.get_user_id(user_name=user_name, guild_id=ctx.author.guild.id)
+            user_id = utils.get_user_id(user_name=user_name, guild_id=ctx.author.guild.id)
             if user_id:
                 user_id = int(user_id[0])
-                items = db.retrieve_inventory(user_id=user_id)
+                items = utils.retrieve_inventory(user_id=user_id)
                 if items:
                     embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
                     embed.set_author(name=user_name)
@@ -59,7 +72,7 @@ class ShopCog(commands.Cog):
                 await ctx.send(f'The user [{user_name}] is not in this guild or has not registered for the battlepass.')
         else:
             user_id = ctx.author.id
-            items = db.retrieve_inventory(user_id=user_id)
+            items = utils.retrieve_inventory(user_id=user_id)
 
             if items:
                 embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
@@ -74,12 +87,14 @@ class ShopCog(commands.Cog):
 
     @commands.command()
     async def buy(self, ctx, *, item_name):
-        '''Purchase item from shop.'''
+        """
+        Purchase item from shop.
+        """
         user_id = ctx.author.id
         guild_id = ctx.author.guild.id
 
         # Check if user is registered for battlepass
-        user = db.get_user_id(user_id=user_id)
+        user = utils.get_user_id(user_id=user_id)
         if user is None:
             await ctx.send('''Register for the battlepass to earn 
                            points and purchase items by using the 
@@ -90,13 +105,13 @@ class ShopCog(commands.Cog):
         item = shop.get(item_name)
         if item:
             # Check if user already owns the item
-            owned_item = db.retrieve_owned_item(user_id=user_id, item_name=item_name)
+            owned_item = utils.retrieve_owned_item(user_id=user_id, item_name=item_name)
             if owned_item:
                 await ctx.send('You already own this item.')
                 return
 
             # Check if user has enough points to purchase item
-            points = int(db.retrieve_points(user_id=user_id))
+            points = int(utils.retrieve_points(user_id=user_id))
             rarity = item[0]
             value = item[1]
 
@@ -105,10 +120,10 @@ class ShopCog(commands.Cog):
 
             if points >= value:
                 # Deduct item value from user points
-                db.update_points(user_id=user_id, points=points - value)
+                utils.update_points(user_id=user_id, points=points - value)
 
                 # Add item to user inventory
-                db.update_inventory(
+                utils.update_inventory(
                     user_id=user_id,
                     guild_id=guild_id,
                     item_name=item_name,
@@ -166,7 +181,7 @@ class ShopCog(commands.Cog):
                 return
 
             # If all args are valid, add to shop_submission table
-            db.create_shop_submission(
+            utils.create_shop_submission(
                 user_id=user_id,
                 user_name=user_name,
                 submit_time=datetime.datetime.now(),
@@ -197,7 +212,7 @@ class ShopCog(commands.Cog):
         embed = discord.Embed(title='Item Submissions', timestamp=datetime.datetime.now())
         # embed.set_thumbnail(url='')
 
-        items = db.retrieve_shop_submissions()
+        items = utils.retrieve_shop_submissions()
         for item in items:
             embed.add_field(name=f'{item[5]}: {item[4]}', value=f'Submitted by: {item[2]}', inline=False)
 
@@ -206,11 +221,13 @@ class ShopCog(commands.Cog):
 
 @tasks.loop(minutes=30)
 async def refresh_shop():
-    '''Updates shop with ten new items every thirty minutes.'''
+    """
+    Updates shop with ten new items every thirty minutes.
+    """
     global shop
     shop.clear()
 
-    shop_items = db.retrieve_shop_items()
+    shop_items = utils.retrieve_shop_items()
     for item in shop_items:
         item_name = item[0]
         rarity = item[1]
@@ -222,7 +239,9 @@ async def refresh_shop():
 
 
 def set_shop_refresh_time(timestamp):
-    '''Updates shop refresh time whenever refresh_shop task runs.'''
+    """
+    Updates shop refresh time whenever refresh_shop task runs.
+    """
     global refresh_time
     refresh_time = timestamp
 
@@ -255,5 +274,7 @@ def calculate_value(rarity: str) -> int:
 
 
 async def setup(bot):
-    '''Runs when bot.load_extension() is called.'''
+    """
+    Runs when bot.load_extension() is called. Adds shop cog to bot.
+    """
     await bot.add_cog(ShopCog(bot))

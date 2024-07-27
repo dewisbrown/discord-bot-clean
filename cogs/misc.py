@@ -89,7 +89,9 @@ class MiscCog(commands.Cog):
 
     @commands.command()
     async def discordstatus(self, ctx):
-        '''Displays status of discord voice (US/East, US/Central)'''
+        """
+        Displays status of discord voice (US/East, US/Central)
+        """
         logging.info('discordstatus command submitted by [%s]', ctx.author.name)
 
         # Define the URL of the Discord Status page
@@ -138,7 +140,9 @@ class MiscCog(commands.Cog):
 
     @commands.command()
     async def game(self, ctx, *, args):
-        '''User inputs game titles and the command returns a random title.'''
+        """
+        User inputs game titles and the command returns a random title.
+        """
         logging.info('Game command submitted by [%s]', ctx.author.name)
         games: list[str] = args.split(',')
 
@@ -153,7 +157,9 @@ class MiscCog(commands.Cog):
 
     @commands.command()
     async def ufc(self, ctx):
-        '''Scrapes ufc site for fight information.'''
+        """
+        Scrapes ufc site for fight information.
+        """
         logging.info('Ufc command submitted by [%s]', ctx.author.name)
 
         url = 'https://www.espn.com/mma/schedule/_/league/ufc'

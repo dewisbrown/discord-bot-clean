@@ -20,14 +20,12 @@ class MiscCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.Cog.listener()
     async def on_ready(self):
         """
         Log statement to show cog loaded successfully.
         """
         logging.info('Misc Cog loaded.')
-
 
     @commands.command()
     async def help(self, ctx, command: str=None):
@@ -136,7 +134,6 @@ class MiscCog(commands.Cog):
         else:
             await ctx.send('US East and US Central status could not be found.')
             logging.error('Web scrape for discordstatus.com unsuccesful.')
-    
 
     @commands.command()
     async def game(self, ctx, *, args):
@@ -153,7 +150,6 @@ class MiscCog(commands.Cog):
         random_choice = random.choice(games).strip()
 
         await ctx.send(f'You should play {random_choice}.')
-
 
     @commands.command()
     async def ufc(self, ctx):
@@ -189,7 +185,6 @@ class MiscCog(commands.Cog):
         else:
             await ctx.send('Something went wrong...')
 
-
     @commands.command()
     async def elijah(self, ctx):
         """
@@ -204,7 +199,6 @@ class MiscCog(commands.Cog):
         embed.add_field(name='Welcome back king.', value='', inline=False)
 
         await ctx.send(embed=embed)
-
 
     @commands.command()
     async def mark(self, ctx):
@@ -223,7 +217,6 @@ class MiscCog(commands.Cog):
         embed.add_field(name='', value=f'{difference.days} days \t{sad_emoji}', inline=False)
 
         await ctx.send(embed=embed)
-
 
     @commands.command()
     async def updates(self, ctx):

@@ -45,9 +45,7 @@ class MusicCog(commands.Cog):
             source = await discord.FFmpegOpusAudio.from_probe(song['url'], **self.FFMPEG_OPTIONS)
             
             # Format duration seconds to MM:SS
-            td = datetime.timedelta(seconds=song['duration'])
-            minutes, seconds = divmod(td.seconds, 60)
-            duration = f'{minutes}:{seconds:02d}'
+            duration = self.format_duration(duration=song['duration'])
 
             # Create and send embed
             embed = discord.Embed(title='Now Playing', timestamp=datetime.datetime.now())
@@ -119,8 +117,10 @@ class MusicCog(commands.Cog):
         logging.info('Queue command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
         if self.url_queue:
             embed = discord.Embed(title=f'{ctx.guild} - Queue: {len(self.url_queue)}', timestamp=datetime.datetime.now())
-            for i, tup in enumerate(self.url_queue):
-                embed.add_field(name=f'{i + 1}. **{tup[1]}** - requested by *{tup[2]}*', value='', inline=False)
+            i = 1
+            for song in self.url_queue:
+                embed.add_field(name=f'{i}. **{song["title"]}** `({self.format_duration(duration=song["duration"])})` - requested by *{song["requester"]}*', value='', inline=False)
+                i += 1
             await ctx.send(embed=embed)
         else:
             await ctx.send('The queue is empty.')
@@ -213,6 +213,14 @@ class MusicCog(commands.Cog):
         track = sp.track(url)
         logging.info('Converting spotify url %s to [%s %s]', url, track['name'], track['artists'][0]['name'])
         return f"{track['name']} {track['artists'][0]['name']}"
+
+    def format_duration(self, duration) -> str:
+        """
+        Formats total6 seconds to format: mm:ss.
+        """
+        td = datetime.timedelta(duration)
+        minutes, seconds = divmod(td.seconds, 60)
+        return f'{minutes}:{seconds:02d}'
 
 async def setup(bot):
     """

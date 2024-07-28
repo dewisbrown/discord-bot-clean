@@ -29,12 +29,13 @@ async def setup(bot):
 ```
 ### Commands
 Looking at the code block above, you can see that commands use the `commands.command()` decorator. Also, each command includes the arg `ctx`, which represents the context in which a command is being invoked under. The Context class contains a lot of metadata, which can be read about [here](https://discordpy.readthedocs.io/en/latest/ext/commands/api.html#discord.ext.commands.Context). This is used to extract data like the author, channel, guild, and voice_client.
-### Helper Modules
-There are a few scripts in the root directory that are used throughout the cog files. `db_interface.py` provides functions for reading and writing to the database file for the bot. `download_yt.py` is used for extracting YouTube/Spotify data from links. `utils.py` contains various functions and constants used by cogs.
+### Utils Package
+All helper functions and database operations are held within the utils package. They are separated by function
 ## Getting Started
 ### Environment Setup
-Install dependencies from `requirements.txt` to your environment. Also be sure to save your bot token to a `.env` file in the root directory. In `bot.py`, the token is used to start the bot.
+Install dependencies from `requirements.txt` to your venv.
+Also be sure to save your bot token to a `.env` file in the root directory, name the token `BOT_TOKEN`. This is used in `bot.py` to start the bot.
 ### Database Setup
 There is a script `database_setup.py` that is run once before using the bot for the first time. Be sure to run this as it creates the db file and necessary tables used throughout the bot.
 ### Running the Bot
-Once all set up is done, you are good to start the bot by running `bot.py`.
+Once all set up is done, start the bot by running `bot.py`.

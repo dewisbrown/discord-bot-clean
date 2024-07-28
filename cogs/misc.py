@@ -20,14 +20,12 @@ class MiscCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.Cog.listener()
     async def on_ready(self):
         """
         Log statement to show cog loaded successfully.
         """
         logging.info('Misc Cog loaded.')
-
 
     @commands.command()
     async def help(self, ctx, command: str=None):
@@ -89,7 +87,9 @@ class MiscCog(commands.Cog):
 
     @commands.command()
     async def discordstatus(self, ctx):
-        '''Displays status of discord voice (US/East, US/Central)'''
+        """
+        Displays status of discord voice (US/East, US/Central)
+        """
         logging.info('discordstatus command submitted by [%s]', ctx.author.name)
 
         # Define the URL of the Discord Status page
@@ -134,11 +134,12 @@ class MiscCog(commands.Cog):
         else:
             await ctx.send('US East and US Central status could not be found.')
             logging.error('Web scrape for discordstatus.com unsuccesful.')
-    
 
     @commands.command()
     async def game(self, ctx, *, args):
-        '''User inputs game titles and the command returns a random title.'''
+        """
+        User inputs game titles and the command returns a random title.
+        """
         logging.info('Game command submitted by [%s]', ctx.author.name)
         games: list[str] = args.split(',')
 
@@ -150,10 +151,11 @@ class MiscCog(commands.Cog):
 
         await ctx.send(f'You should play {random_choice}.')
 
-
     @commands.command()
     async def ufc(self, ctx):
-        '''Scrapes ufc site for fight information.'''
+        """
+        Scrapes ufc site for fight information.
+        """
         logging.info('Ufc command submitted by [%s]', ctx.author.name)
 
         url = 'https://www.espn.com/mma/schedule/_/league/ufc'
@@ -183,7 +185,6 @@ class MiscCog(commands.Cog):
         else:
             await ctx.send('Something went wrong...')
 
-
     @commands.command()
     async def elijah(self, ctx):
         """
@@ -198,7 +199,6 @@ class MiscCog(commands.Cog):
         embed.add_field(name='Welcome back king.', value='', inline=False)
 
         await ctx.send(embed=embed)
-
 
     @commands.command()
     async def mark(self, ctx):
@@ -218,20 +218,20 @@ class MiscCog(commands.Cog):
 
         await ctx.send(embed=embed)
 
-
     @commands.command()
     async def updates(self, ctx):
         """
         Bot changes and updates listed in embed.
         """
         # Update timestamp each time new updates are posted
-        embed = discord.Embed(title='GummyBot Updates', timestamp=datetime.datetime(year=2024, month=6, day=16, hour=9, minute=20))
+        embed = discord.Embed(title='GummyBot Updates', timestamp=datetime.datetime(year=2024, month=7, day=26, hour=7, minute=5))
         embed.set_footer(text='Changes to the bot were made at the following timestamp')
         embed.set_thumbnail(url='https://64.media.tumblr.com/84f68fd1ada52c9840b2dbe497f7eeb1/tumblr_ox2sd2eAXn1v64bqao5_r1_400.png')
 
         # Input changes made, adjust when new features added
         changes = [
-            ['`$daily`', 'New command to earn points daily.'],
+            ['`$play`', 'Fixed music playing in voice channel.'],
+            ['Code base', 'Cleaned up code base, better organization.']
         ]
 
         for change in changes:

@@ -4,7 +4,7 @@ FROM python:3.11
 # Make app directory
 RUN mkdir -p /app
 
-# Define working directory
+# Set newly created app directory as working directory
 WORKDIR /app
 
 # Copy .env file over
@@ -16,7 +16,7 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all other files in project directory
+# Copy all other files to /app
 COPY . .
 
 # Run the bot

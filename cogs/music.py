@@ -154,10 +154,36 @@ class MusicCog(commands.Cog):
         """
         logging.info('Move command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
 
+        # Convert args to integers
+        try:
+            index1 = int(index1)
+            index2 = int(index2)
+        except ValueError:
+            logging.error('[%s:%s] submitted non-integer args for move command.', ctx.author.name, ctx.author.id)
+            await ctx.send('Submit whole numbers.')
+            return
+
+        # Check user input
+        if index1 < 1 or index2 < 1:
+            await ctx.send('Submit numbers greater than zero.')
+            return
+
+        if index1 == index2:
+            await ctx.send('Submit two different nubmers.')
+            return
+
+        if index1 > len(self.url_queue) or index2 > len(self.url_queue):
+            await ctx.send(f'Submit numbers less than the queue total: {len(self.url_queue)}')
+            return
+
         index1 -= 1
         index2 -= 1
 
-        # TODO: implement reordering of queue
+        # Move list items
+        temp = self.url_queue[index1]
+        self.url_queue[index1] = self.url_queue[index2]
+        self.url_queue[index2] = temp
+        await ctx.send('Successfully moved queue song positions: [%s] <-> [%s]', index1, index2)
 
     @commands.command()
     async def pause(self, ctx):

@@ -5,4 +5,5 @@ services:
       - .env
     volumes:
       - /srv/data/gummybot:/app/data
+      - /srv/data/gummybot/logs:/app/logs
     restart: unless-stopped

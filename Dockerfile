@@ -13,6 +13,12 @@ COPY requirements.txt requirements.txt
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg
+
+# Set timezone
+ENV TZ=America/Chicago
+
 # Copy all other files in project directory
 COPY . .
 

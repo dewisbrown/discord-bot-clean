@@ -216,10 +216,9 @@ class MusicCog(commands.Cog):
 
     def format_duration(self, duration) -> str:
         """
-        Formats total6 seconds to format: mm:ss.
+        Formats total seconds to: mm:ss.
         """
-        td = datetime.timedelta(duration)
-        minutes, seconds = divmod(td.seconds, 60)
+        minutes, seconds = divmod(duration, 60)
         return f'{minutes}:{seconds:02d}'
 
 async def setup(bot):

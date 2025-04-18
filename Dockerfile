@@ -2,7 +2,7 @@
 FROM python:3.11
 
 # Make app directory
-RUN mkdir -p /app
+RUN mkdir -p /app /app/logs
 
 # Define working directory
 WORKDIR /app
@@ -21,8 +21,6 @@ ENV TZ=America/Chicago
 
 # Copy all other files in project directory
 COPY . .
-
-RUN mkdir -p /app/logs
 
 # Run the bot
 CMD ["python", "bot.py"]

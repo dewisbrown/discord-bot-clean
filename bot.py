@@ -10,7 +10,7 @@ from discord.ext import commands
 load_dotenv()
 
 # Logging setup
-LOG_PATH = os.getenv('LOG_PATH')
+LOG_PATH = os.getenv('LOG_PATH', '/app/logs/bot.log')
 logging.basicConfig(format='[%(asctime)s] %(levelname)s: %(message)s [Line: %(lineno)d <%(filename)s>]',
                     datefmt='%I:%M:%S %p',
                     level=logging.INFO)

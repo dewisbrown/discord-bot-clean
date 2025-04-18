@@ -46,12 +46,12 @@ async def load():
     """
     Loads cogs for bots.
     """
-    # cogs_directory = os.path.join(os.path.dirname(__file__), 'cogs')
-    # cog_files = [f.split('.')[0] for f in os.listdir(cogs_directory) if f.endswith('.py')]
+    cogs_directory = os.path.join(os.path.dirname(__file__), 'cogs')
+    cog_files = [f.split('.')[0] for f in os.listdir(cogs_directory) if f.endswith('.py')]
 
-    # for cog in cog_files:
-    #     await bot.load_extension(f'cogs.{cog}')
-    await bot.load_extension('cogs.music')
+    for cog in cog_files:
+        if cog == 'music':
+            await bot.load_extension(f'cogs.{cog}')
 
 
 async def main():

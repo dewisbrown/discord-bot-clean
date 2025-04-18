@@ -22,5 +22,7 @@ ENV TZ=America/Chicago
 # Copy all other files in project directory
 COPY . .
 
+RUN mkdir -p /app/logs
+
 # Run the bot
 CMD ["python", "bot.py"]

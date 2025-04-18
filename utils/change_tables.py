@@ -1,9 +1,10 @@
 import sqlite3
 import os
 
+from dotenv import load_dotenv
 
-rel_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'battlepass.db')
-DB_FILE = os.path.abspath(rel_path)
+load_dotenv()
+DB_FILE = os.getenv('ABS_DB_PATH')
 
 def add_column_to_table(table_name: str, col_name: str, col_type: str) -> None:
     """

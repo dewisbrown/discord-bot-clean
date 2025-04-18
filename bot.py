@@ -6,12 +6,20 @@ import discord
 from dotenv import load_dotenv
 from discord.ext import commands
 
+
+load_dotenv()
+
 # Logging setup
-logging.basicConfig(format='[Line: %(lineno)d <%(filename)s>] %(levelname)s: %(message)s [%(asctime)s]',
+LOG_PATH = os.getenv('LOG_PATH')
+logging.basicConfig(format='[%(asctime)s] %(levelname)s: %(message)s [Line: %(lineno)d <%(filename)s>]',
                     datefmt='%I:%M:%S %p',
                     level=logging.INFO)
 
-load_dotenv()
+file_handler = logging.FileHandler(LOG_PATH)
+file_handler.setFormatter((logging.Formatter(
+                    '[%(asctime)s] %(levelname)s: %(message)s [Line: %(lineno)d <%(filename)s>]',
+                    datefmt='%I:%M:%S %p')))
+logging.getLogger().addHandler(file_handler)
 
 intents = discord.Intents.default()
 intents.message_content = True

@@ -1,0 +1,11 @@
+services:
+  gummybot:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - /srv/data/gummybot:/app/data
+      - /srv/data/gummybot/logs:/app/logs
+    environment:
+      - TZ=America/Chicago
+    restart: unless-stopped

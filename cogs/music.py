@@ -253,6 +253,13 @@ class MusicCog(commands.Cog):
         logging.info('Converting spotify url %s to [%s %s]', url, track['name'], track['artists'][0]['name'])
         return f"{track['name']} {track['artists'][0]['name']}"
 
+    def format_duration(self, duration) -> str:
+        """
+        Formats total seconds to: mm:ss.
+        """
+        minutes, seconds = divmod(duration, 60)
+        return f'{minutes}:{seconds:02d}'
+
 async def setup(bot):
     """
     Adds music cog to bot.

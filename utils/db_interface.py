@@ -5,9 +5,11 @@ Provides a way to input and retreive data from database.
 import sqlite3
 import os
 
+from dotenv import load_dotenv
 
-rel_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'battlepass.db')
-DB_FILE = os.path.abspath(rel_path)
+
+load_dotenv()
+DB_FILE = os.getenv('DB_PATH')
 
 def get_user_id(**kwargs):
     """

@@ -77,6 +77,7 @@ class MusicCog(commands.Cog):
                 if self.is_spotify_url(url):
                     url = self.get_search_terms(url)
                 info = ydl.extract_info(url, download=False)
+                logging.info(f'Info from ydl.extract_info(): {info}')
                 if 'entries' in info:
                     info = info['entries'][0]
 

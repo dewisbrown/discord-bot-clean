@@ -239,6 +239,17 @@ class MiscCog(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.commnd()
+    async def translate(self, ctx, *, text):
+        """
+        Takes input from user and returns translated text.
+        """
+        logging.info('Translate command submitted by [%s:%s]', ctx.author.name, ctx.author.id)
+        translator = Translator()
+        translator.translate(text)
+
+        await ctx.send(f'Tranlated text: {translator.text}')
+
 
 async def setup(bot):
     """

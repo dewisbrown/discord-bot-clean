@@ -11,6 +11,11 @@ load_dotenv()
 
 # Logging setup
 LOG_PATH = os.getenv('LOG_PATH', '/app/logs/bot.log')
+
+# Ensure dir for log file exists
+os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+
+# Configure logging
 logging.basicConfig(format='[%(asctime)s] %(levelname)s: %(message)s [Line: %(lineno)d <%(filename)s>]',
                     datefmt='%I:%M:%S %p',
                     level=logging.INFO)

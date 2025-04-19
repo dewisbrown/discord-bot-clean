@@ -1,7 +1,7 @@
 import os
 import logging
 import asyncio
-
+import re
 import discord
 import spotipy
 import yt_dlp
@@ -55,8 +55,7 @@ class MusicCog(commands.Cog):
     @commands.command(name='play')
     async def play(self, ctx: commands.Context, *, query: str):
         """
-        Uses user input to query YouTube for audio stream, then plays
-        audio stream in a discord voice channel.
+        Uses user input to query YouTube for audio stream or play a direct YouTube link.
         """
         try:
             voice_channel: discord.VoiceChannel = ctx.author.voice.channel
@@ -74,27 +73,46 @@ class MusicCog(commands.Cog):
             elif voice_channel != voice_client.channel:
                 await voice_client.move_to(voice_channel)
 
-            if self.is_spotify_url(query):
-                query = self.get_search_terms(query)
+            # Check if the input is a direct YouTube URL
+            youtube_url_pattern = r'(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+'
+            if re.match(youtube_url_pattern, query):
+                # Extract metadata from the direct YouTube link
+                metadata = await self.search_ytdlp_async(query, self.YDL_OPTIONS)
+                audio_url = metadata['url']
+                title = metadata.get('title', 'untitled')
+                song_duration = metadata.get('duration', 0)  # Duration in seconds
+                thumbnail = metadata.get('thumbnail', '')  # Thumbnail URL
+            else:
+                # If not a URL, treat it as a search query
+                if self.is_spotify_url(query):
+                    query = self.get_search_terms(query)
 
-            results = await self.search_ytdlp_async(query, self.YDL_OPTIONS)
-            tracks = results.get('entries', [])
+                results = await self.search_ytdlp_async(query, self.YDL_OPTIONS)
+                tracks = results.get('entries', [])
 
-            # Check if tracks is empty
-            if not tracks:
-                await ctx.send('No results found for your query.')
-                return
+                # Check if tracks is empty
+                if not tracks:
+                    await ctx.send('No results found for your query.')
+                    return
 
-            first_track = tracks[0]
-            audio_url = first_track['url']
-            title = first_track.get('title', 'untitled')
+                first_track = tracks[0]
+                audio_url = first_track['url']
+                title = first_track.get('title', 'untitled')
+                song_duration = first_track.get('duration', 0)  # Duration in seconds
+                thumbnail = first_track.get('thumbnail', '')  # Thumbnail URL
 
             guild_id = str(ctx.guild.id)
             if self.SONG_QUEUES.get(guild_id) is None:
                 self.SONG_QUEUES[guild_id] = deque()
 
-            # Add the song to the queue with the requester's name
-            self.SONG_QUEUES[guild_id].append((audio_url, title, ctx.author.display_name))
+            # Add the song to the queue with all metadata
+            self.SONG_QUEUES[guild_id].append({
+                'audio_url': audio_url,
+                'title': title,
+                'requester': ctx.author.display_name,
+                'song_duration': song_duration,
+                'thumbnail': thumbnail
+            })
 
             if voice_client.is_playing() or voice_client.is_paused():
                 await ctx.send(f'Added to queue: **{title}** - *Requested by* {ctx.author.display_name}')
@@ -190,8 +208,11 @@ class MusicCog(commands.Cog):
         Plays the next song in the queue. Optionally sends a message when a song starts playing.
         """
         if self.SONG_QUEUES[guild_id]:
-            # Unpack all three elements from the deque
-            audio_url, title, requester = self.SONG_QUEUES[guild_id].popleft()
+            # Unpack all metadata from the deque
+            song_metadata = self.SONG_QUEUES[guild_id].popleft()
+            audio_url = song_metadata['audio_url']
+            title = song_metadata['title']
+            requester = song_metadata['requester']
 
             source = discord.FFmpegOpusAudio(audio_url, **self.FFMPEG_OPTIONS)
 
@@ -226,7 +247,9 @@ class MusicCog(commands.Cog):
         # Build the queue message
         queue_list = self.SONG_QUEUES[guild_id]
         queue_message = "**Current Queue:**\n"
-        for index, (audio_url, title, requester) in enumerate(queue_list, start=1):
+        for index, song_metadata in enumerate(queue_list, start=1):
+            title = song_metadata['title']
+            requester = song_metadata['requester']
             queue_message += f"{index}. {title} - *Requested by* {requester}\n"
 
         await ctx.send(queue_message)

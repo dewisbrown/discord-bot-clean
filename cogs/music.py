@@ -5,6 +5,7 @@ import re
 import discord
 import spotipy
 import yt_dlp
+import traceback
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyClientCredentials
 from collections import deque
@@ -79,6 +80,7 @@ class MusicCog(commands.Cog):
                 # Extract metadata from the direct YouTube link
                 metadata = await self.search_ytdlp_async(query, self.YDL_OPTIONS)
                 audio_url = metadata['url']
+                video_url = metadata.get('webpage_url', query)  # Use the video URL or fallback to the input URL
                 title = metadata.get('title', 'untitled')
                 song_duration = metadata.get('duration', 0)  # Duration in seconds
                 thumbnail = metadata.get('thumbnail', '')  # Thumbnail URL
@@ -97,6 +99,7 @@ class MusicCog(commands.Cog):
 
                 first_track = tracks[0]
                 audio_url = first_track['url']
+                video_url = first_track.get('webpage_url', '')  # Extract the video URL
                 title = first_track.get('title', 'untitled')
                 song_duration = first_track.get('duration', 0)  # Duration in seconds
                 thumbnail = first_track.get('thumbnail', '')  # Thumbnail URL
@@ -108,6 +111,7 @@ class MusicCog(commands.Cog):
             # Add the song to the queue with all metadata
             self.SONG_QUEUES[guild_id].append({
                 'audio_url': audio_url,
+                'video_url': video_url,  # Add the video URL to the metadata
                 'title': title,
                 'requester': ctx.author.display_name,
                 'song_duration': song_duration,
@@ -119,7 +123,7 @@ class MusicCog(commands.Cog):
             else:
                 await self.play_next_song(voice_client, guild_id, ctx)
         except Exception as e:
-            logging.error(f"Error in play command: {e}")
+            log_error('play', e)
             await ctx.send('An error occurred while trying to play the song.')
 
     @commands.command(name='skip')
@@ -202,7 +206,6 @@ class MusicCog(commands.Cog):
 
         await ctx.send('Playback has been stopped. Bye!')
 
-    @commands.command(name='play_next_song')
     async def play_next_song(self, voice_client: discord.VoiceClient, guild_id, ctx: commands.Context, send_message: bool = True):
         """
         Plays the next song in the queue. Optionally sends a message when a song starts playing.
@@ -211,8 +214,11 @@ class MusicCog(commands.Cog):
             # Unpack all metadata from the deque
             song_metadata = self.SONG_QUEUES[guild_id].popleft()
             audio_url = song_metadata['audio_url']
+            video_url = song_metadata['video_url']  # Extract the video URL
             title = song_metadata['title']
             requester = song_metadata['requester']
+            song_duration = song_metadata['song_duration']
+            thumbnail = song_metadata['thumbnail']
 
             source = discord.FFmpegOpusAudio(audio_url, **self.FFMPEG_OPTIONS)
 
@@ -225,9 +231,18 @@ class MusicCog(commands.Cog):
 
             voice_client.play(source, after=after_play)
 
-            # Only send the "Now playing" message if send_message is True
+            # Only send the "Now Playing" message if send_message is True
             if send_message:
-                await ctx.send(f'Now playing: **{title}** - *Requested by* {requester}')
+                # Create and send the embed
+                embed = discord.Embed(
+                    title="Now Playing",
+                    description=f"[{title}]({video_url}) - `[{self.format_duration(song_duration)}]`",
+                    color=discord.Color.blue()
+                )
+                embed.add_field(name="", value=f'*Requested by* - {requester}', inline=True)
+                embed.set_thumbnail(url=thumbnail)
+                embed.timestamp = discord.utils.utcnow()
+                await ctx.send(embed=embed)
         else:
             await voice_client.disconnect()
             self.SONG_QUEUES[guild_id] = deque()
@@ -246,13 +261,16 @@ class MusicCog(commands.Cog):
 
         # Build the queue message
         queue_list = self.SONG_QUEUES[guild_id]
-        queue_message = "**Current Queue:**\n"
+        embed = discord.Embed(
+            title=f"Current Queue - {self.SONG_QUEUES[guild_id].__len__()}",
+            color=discord.Color.blue()
+        )
         for index, song_metadata in enumerate(queue_list, start=1):
             title = song_metadata['title']
             requester = song_metadata['requester']
-            queue_message += f"{index}. {title} - *Requested by* {requester}\n"
+            embed.add_field(name=f"", value=f"{index}. {title} - *Requested by* {requester}", inline=False)
 
-        await ctx.send(queue_message)
+        await ctx.send(embed=embed)
 
     def is_spotify_url(self, user_input: str) -> bool:
         """
@@ -282,6 +300,12 @@ class MusicCog(commands.Cog):
         """
         minutes, seconds = divmod(duration, 60)
         return f'{minutes}:{seconds:02d}'
+
+def log_error(command_name: str, error: Exception):
+    """
+    Logs an error with its traceback.
+    """
+    logging.error(f"Error in {command_name} command: {error}\n{traceback.format_exc()}")
 
 async def setup(bot):
     """

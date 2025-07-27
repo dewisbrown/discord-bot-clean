@@ -24,11 +24,11 @@ class MusicCog(commands.Cog):
             'options': '-vn -c:a libopus -b:a 96k',
             }
         self.YDL_OPTIONS = {
-            'format': 'bestaudio[abr<=96]/bestaudio', 
+            'format': 'bestaudio/best', 
             'noplaylist' : True,
             'youtube_include_dash_manifest': False,
             'youtube_include_hls_manifest': False,
-            'default_search': 'ytsearch1',
+            'default_search': 'ytsearch',
         }
         load_dotenv()
 

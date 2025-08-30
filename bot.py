@@ -52,7 +52,7 @@ async def on_command_error(ctx, error):
     """
     if isinstance(error, commands.CommandNotFound):
         await ctx.send('Command not found. Type `$help` for a list of commands.')
-        logging.error('User input command that does not exist.')
+        logging.error(error)
 
 
 async def load():
@@ -63,7 +63,6 @@ async def load():
     cog_files = [f.split('.')[0] for f in os.listdir(cogs_directory) if f.endswith('.py')]
 
     for cog in cog_files:
-        if cog == 'music':
             await bot.load_extension(f'cogs.{cog}')
 
 

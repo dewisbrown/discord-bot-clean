@@ -239,7 +239,7 @@ class MiscCog(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.commnd()
+    @commands.command()
     async def translate(self, ctx, *, text):
         """
         Takes input from user and returns translated text.
